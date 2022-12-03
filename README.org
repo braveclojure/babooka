@@ -19,16 +19,16 @@ comprehensive tutorial that will help you understand:
 - How to organize your babashka projects
 - What pods and tasks are, and how to use them
 
-If you'd like to stop doing something that hurt (writing incomprehensible shell
-scripts) and start doing something that feels great (writing babashka scripts),
+If you'd like to stop doing something that hurts (writing incomprehensible shell
+scripts) and start doing something that feels great (writing Babashka scripts),
 then read on!
 
-** What is babashka?
+** What is Babashka?
 
 From a user perspective, babashka is a scripting runtime for the Clojure
 programming language. It lets you execute Clojure programs in contexts where
-you'd typically used bash, ruby, python, and the like. From a CLI, you can run
-something like the following to immediately execute your Clojure program:
+you'd typically used bash, ruby, python, and the like. You can run something
+like the following in a terminal to immediately execute your Clojure program:
 
 #+begin_src bash
 bb my-clojure-program.clj
