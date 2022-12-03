@@ -27,8 +27,13 @@ then read on!
 
 From a user perspective, babashka is a scripting runtime for the Clojure
 programming language. It lets you execute Clojure programs in contexts where
-you'd typically used bash, ruby, python, and the like. You can run something
-like the following in a terminal to immediately execute your Clojure program:
+you'd typically used bash, ruby, python, and the like. Typical use cases of
+babashka include: build scripts, command line utilities, small web applications,
+task runner, git hooks, AWS Lambda and everywhere you may want to use Clojure
+where fast startup and/or low resource usage matters.
+
+You can run something like the following in a terminal to immediately execute
+your Clojure program:
 
 #+begin_src bash
 bb my-clojure-program.clj
@@ -44,8 +49,8 @@ language. Clojure is a /hosted/ language, meaning that the language is defined
 independently of the underlying runtime environment. Most Clojure programs are
 compiled to run on the Java Virtual Machine so that they can be run anywhere
 Java runs. The other main target is JavaScript, allowing Clojure to run in a
-browser. With Babashka, you can now write Clojure programs where you'd normally
-write bash. The time you spend investing in Clojure pays dividends as your
+browser. With Babashka, you can now run Clojure programs where you'd normally
+run bash scripts. The time you spend investing in Clojure pays dividends as your
 knowledge transfers to these varied environments.
 
 From an implementation perspective, Babashka is a self-contained,
