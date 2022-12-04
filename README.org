@@ -51,7 +51,8 @@ compiled to run on the Java Virtual Machine so that they can be run anywhere
 Java runs. The other main target is JavaScript, allowing Clojure to run in a
 browser. With Babashka, you can now run Clojure programs where you'd normally
 run bash scripts. The time you spend investing in Clojure pays dividends as your
-knowledge transfers to these varied environments.
+knowledge transfers to these varied environments. (Note that this tutorial
+assumes basic familiarity with Clojure.)
 
 From an implementation perspective, Babashka is a standalone, natively-compiled
 binary, meaning that it executes "directly" on the operating system, rather than
@@ -130,22 +131,43 @@ subconscious hallucinations is deeply amusing to me.
 Create a file named ~hello.clj~ and put this in it:
 
 #+begin_src clojure
-"Hello, inner world!"
+(require '[clojure.string :as str])
+(str/join " " ["Hello" "inner" "world!"])
 #+end_src
 
 Now run it with
 
 #+begin_src clojure
-bb welcome.clj
+bb hello.clj
 #+end_src
 
-You should see it print the text ~"Hello, inner world!"~.
+You should see it print the text ~"Hello inner world!"~.
 
 There are a few things here to point out for experienced Clojurians:
 
 - You didn't need a deps.edn file or project.clj
-- There's no namespace declaration
+- There's no namespace declaration; we're ~(require ...)~
 - You didn't need to print the string for the string to be printed
+- It's just Clojure
+
+I very much recommend that you actually try this example before proceeding
+because it /feels/ different from what you're used to. It's unlikely that you're
+used to throwing a few Clojure expressions into a file and being able to run
+them immediately.
+
+When I first started using Babashka, it felt so different that it was
+disorienting. It was like the first time I tried driving an electric car and my
+body freaked out a little because I wasn't getting the typical sensory cues like
+hearing and feeling the engine starting.
+
+Babashka's like that: the experience is so quiet and smooth it's jarring. No
+deps.edn, no namespace declaration, write only the code you need and it runs!
+
+That's why I included the "It's just Clojure" bullet point. It might feel
+different, but this is still Clojure. Let's explore the other points in more
+detail.
+
+** Babashka's output
 
 Here's what's going on: ~bb~ interprets the Clojure code you've written,
 executing it on the fly. It prints the last value it encounters to ~stdout~,
@@ -172,8 +194,69 @@ nil
 
 With ~nil~ as the last form, ~bb~ does not print to ~stdout~ on exit.
 
+** Namespace is optional
+
 As for the lack of namespace: this is part of what makes Babashka useful as a
-scripting tool.
+scripting tool. When you're in a scripting state of mind, you want to start
+hacking on ideas immediately; you don't want to have to deal with boilerplate
+just to get started. Babashka has your back.
+
+You /can/ define a namespace (we'll look at that more when we get into project
+organization), but if you don't then Babashka uses the ~user~ namespace by
+default. Try updating your file to read:
+
+#+BEGIN_SRC clojure
+(str "Hello from " *ns* ", inner world!")
+#+END_SRC
+
+Running it will print ~"Hello from user, inner world!"~. This might be
+surprising becase there's a mismatch between filename (~hello.clj~) and
+namespace name. In other Clojure implementations, the current namespace strictly
+corresponds to the source file's filename, but Babashka relaxes that a little
+bit in this specific context. It provides a scripting experience that's more in
+line with what you'd expect from using other scripting languages.
+
+** What about requiring other namespaces?
+
+You might want to include a namespace declaration because you want to require
+other namespaces. With JVM Clojure and Clojurescript, you require other
+namespaces like this:
+
+#+begin_src clojure
+(ns user
+  (:require
+   [clojure.string :as str]))
+#+end_src
+
+It's considered bad form to require namespaces by putting ~(require
+'[clojure.string :as str])~ in your source code.
+
+That's not the case with Babashka. You'll see ~(require ...)~ used liberally in
+other examples, and it's OK for you to do that too.
+
+** Executable script
+
+What if you want to execute your script by typing something like ~./hello~
+instead of ~bb hello.clj~? You just need to rename your file, add a shebang, and
+~chmod +x~ that bad boy. Update ~hello.clj~ to read:
+
+#+begin_src clojure
+#!/usr/bin/env bb
+
+(str "Hello from " *ns* ", inner world!")
+#+end_src
+
+Then run this in your terminal:
+
+#+begin_src bash
+mv hello{.clj,}
+chmod +x hello
+./hello
+#+end_src
+
+* I/O
+
+
 
 * COMMENT outline
 ** What is babashka?
