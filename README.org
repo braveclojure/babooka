@@ -146,7 +146,7 @@ You should see it print the text ~"Hello inner world!"~.
 There are a few things here to point out for experienced Clojurians:
 
 - You didn't need a deps.edn file or project.clj
-- There's no namespace declaration; we're ~(require ...)~
+- There's no namespace declaration; we use ~(require ...)~
 - You didn't need to print the string for the string to be printed
 - It's just Clojure
 
@@ -255,6 +255,22 @@ chmod +x hello
 #+end_src
 
 * I/O
+
+Our dream journal is going to store entries in a ~.edn~ file. The journal will
+be a vector, and each entry will be a map with the keys ~:timestamp~ and
+~:entry~ (the entry has linebreaks for readability):
+
+#+BEGIN_SRC clojure
+[{:timestamp 0
+  :entry     "Dreamt the drain was clogged again, except when I went to unclog
+              it it kept growing and getting more clogged and eventually it
+              swallowed up my little unclogger thing"}
+ {:timestamp 1
+  :entry     "Was giving a tour of the house I just bought, moved to the backyard
+              and all the... topiary? came alive and I had to fight it with a sword.
+              I understood that this happens every night was very annoyed that this
+              was not disclosed in the listing."}]
+#+END_SRC
 
 
 
