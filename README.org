@@ -3,15 +3,15 @@
 * Introduction
 
 There are two types of programmers in the world: the practical, sensible,
-shell-resigned people who need to google the correct argument order for `ln -s`
+shell-resigned people who need to google the correct argument order for ~ln -s~
 -- and those twisted, Stochholmed souls who will gleefully spend a weekend
 cooking up hundreds of lines of bash.
 
 This guide is for the former. For the latter: sorry, but I can't help you.
 
-[[https://babashka.org][Babashka]] is a Clojure scripting runtime that is a
-powerful, delightful alternative to the shell scripts you're used to. This is a
-comprehensive tutorial that will help you understand:
+[[https://babashka.org][Babashka]] is a Clojure scripting runtime that is a powerful, delightful
+alternative to the shell scripts you're used to. This is a comprehensive
+tutorial that will help you understand:
 
 - What babashka is, what it does, how it works, and how it can fit into your
   toolset
@@ -29,8 +29,8 @@ From a user perspective, babashka is a scripting runtime for the Clojure
 programming language. It lets you execute Clojure programs in contexts where
 you'd typically used bash, ruby, python, and the like. Typical use cases of
 babashka include: build scripts, command line utilities, small web applications,
-task runner, git hooks, AWS Lambda and everywhere you may want to use Clojure
-where fast startup and/or low resource usage matters.
+git hooks, AWS Lambda functions, and everywhere you want to use Clojure where
+fast startup and/or low resource usage matters.
 
 You can run something like the following in a terminal to immediately execute
 your Clojure program:
@@ -53,12 +53,18 @@ browser. With Babashka, you can now run Clojure programs where you'd normally
 run bash scripts. The time you spend investing in Clojure pays dividends as your
 knowledge transfers to these varied environments.
 
-From an implementation perspective, Babashka is a self-contained,
-natively-compiled binary that uses the [[https://github.com/babashka/SCI][Small Clojure Interpreter (SCI)]] to
-interpret Clojure on the fly. Its implementation of Clojure is nearly at parity
-with JVM Clojure, and it improves daily thanks to [[https://github.com/borkdude][Michiel Borkent]]'s ceaseless
-work. It's built with GraalVM. This guide is focused on becoming productive with
-Babashka, and so I won't be going into any more implementation details.
+From an implementation perspective, Babashka is a standalone, natively-compiled
+binary, meaning that it executes "directly" on the operating system, rather than
+runningin a JVM. When the babashka binary gets compiled, it includes many
+Clojure namespaces and libraries so that they are usable with native
+performance.
+
+The binary also includes the [[https://github.com/babashka/SCI][Small Clojure Interpreter (SCI)]] to interpret the
+Clojure you write and additional libraries you include on the fly. Its
+implementation of Clojure is nearly at parity with JVM Clojure, and it improves
+daily thanks to [[https://github.com/borkdude][Michiel Borkent]]'s ceaseless work. It's built with GraalVM. This
+guide is focused on becoming productive with Babashka and doesn't cover the
+implementation in depth.
 
 ** Why should you use it?
 
@@ -94,10 +100,10 @@ call like
 Babashka comes with a task interface which gives you a consistent way of
 defining such commands. Take that, bash!
 
-*A rich set of libraries.* Babashka comes with a helper utilities for doing
+*A rich set of libraries.* Babashka comes with helper utilities for doing
 typical shell script grunt work like interacting with processes or mucking about
-with the filesystem. It also has support for the following without needing
-extra dependencies:
+with the filesystem. It also has support for the following without needing extra
+dependencies:
 
 - JSON parsing
 - YAML parsing
@@ -105,7 +111,8 @@ extra dependencies:
 - Writing generative tests
 
 And of course, you can add Clojure libraries as dependencies to accomplish even
-more.
+more. Clojure is a gateway drug to other programming paradigms, so if you ever
+wanted to do e.g. logic programming from the command line, now's your chance!
 
 ** Installation
 
@@ -115,7 +122,59 @@ Installing with brew is ~brew install borkdude/brew/babashka~.
 
 
 * Your first script
-**
+
+Throughout this tutorial we're going to play with building a little CLI-based
+dream journal. Why? Because the idea of you nerds recording your weird little
+subconscious hallucinations is deeply amusing to me.
+
+Create a file named ~hello.clj~ and put this in it:
+
+#+begin_src clojure
+"Hello, inner world!"
+#+end_src
+
+Now run it with
+
+#+begin_src clojure
+bb welcome.clj
+#+end_src
+
+You should see it print the text ~"Hello, inner world!"~.
+
+There are a few things here to point out for experienced Clojurians:
+
+- You didn't need a deps.edn file or project.clj
+- There's no namespace declaration
+- You didn't need to print the string for the string to be printed
+
+Here's what's going on: ~bb~ interprets the Clojure code you've written,
+executing it on the fly. It prints the last value it encounters to ~stdout~,
+which is why ~"Hello, inner world!"~ is returned in your terminal.
+
+Notice that the quotes are maintained when the value is printed. ~bb~ will
+print the /stringified representation of your data structure/. If you updated
+~hello.clj~ to read
+
+#+begin_src clojure
+"Hello, inner world!"
+["It's" "me," "your" "wacky" "subconscious!"]
+#+end_src
+
+Then ~["It's" "me," "your" "wacky" "subconscious!"]~ would get printed, and
+~"Hello, inner world!"~ would not.
+
+If you want to print a string without the surrounding quotes, you can use
+
+#+begin_src clojure
+(println "Hello, inner world!")
+nil
+#+end_src
+
+With ~nil~ as the last form, ~bb~ does not print to ~stdout~ on exit.
+
+As for the lack of namespace: this is part of what makes Babashka useful as a
+scripting tool.
+
 * COMMENT outline
 ** What is babashka?
 *** how it's meant to be used
