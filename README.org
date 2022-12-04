@@ -128,6 +128,12 @@ Throughout this tutorial we're going to play with building a little CLI-based
 dream journal. Why? Because the idea of you nerds recording your weird little
 subconscious hallucinations is deeply amusing to me.
 
+In this section, you're going to learn:
+
+- How to write and run your first Babashka script
+- How default output is handled
+- A little about how Babashka treats namespaces
+
 Create a file named ~hello.clj~ and put this in it:
 
 #+begin_src clojure
@@ -254,11 +260,26 @@ chmod +x hello
 ./hello
 #+end_src
 
-* I/O
+** Summary
 
-Our dream journal is going to store entries in a ~.edn~ file. The journal will
-be a vector, and each entry will be a map with the keys ~:timestamp~ and
-~:entry~ (the entry has linebreaks for readability):
+Here's what you learned in this section:
+
+- You can run scripts with ~bb script-name.clj~
+- You can make scripts directly executable by adding ~#!/usr/bin/env bb~ on the
+  top line and adding the ~execute~ permission with ~chmod +x script-name.clj~
+- You don't have to include an ~(ns ...)~ declaration in your script. But it
+  still runs and it's still Clojure!
+- It's acceptable and even encouraged to require namespaces with ~(require
+  ...)~.
+- Babashka writes the last value it encounters to ~stdout~
+
+* I/O and the filesystem
+
+Shell scripts often need to read input from the command line and produce output
+somewhere, and our dream journal utility is no exception. It's going to store
+entries in the file ~entries.edn~. The journal will be a vector, and each entry
+will be a map with the keys ~:timestamp~ and ~:entry~ (the entry has linebreaks
+for readability):
 
 #+BEGIN_SRC clojure
 [{:timestamp 0
@@ -272,6 +293,67 @@ be a vector, and each entry will be a map with the keys ~:timestamp~ and
               was not disclosed in the listing."}]
 #+END_SRC
 
+To write to the journal, we want to run the command ~./journal add "Hamsters.
+Hamsters everywhere. Again."~. The result should be that a map gets appended to
+the vector.
+
+** Reading and writing files
+
+Let's get ourselves part of the way there. Create the file ~journal~ and make it
+executable with ~chmod +x journal~, then make it look like this:
+
+#+begin_src clojure
+#!/usr/bin/env bb
+
+(require '[babashka.fs :as fs])
+(require '[clojure.edn :as edn])
+
+(def ENTRIES-LOCATION "entries.edn")
+
+(defn read-entries
+  []
+  (if (fs/exists? ENTRIES-LOCATION)
+    (edn/read-string (slurp ENTRIES-LOCATION))
+    []))
+
+(defn add-entry
+  [text]
+  (let [entries (read-entries)]
+    (spit ENTRIES-LOCATION
+          (conj entries {:timestamp (System/currentTimeMillis)
+                         :entry     text}))))
+
+(add-entry (first *command-line-args*))
+#+end_src
+
+We require a couple namespaces: ~babashka.fs~ and ~clojure.edn~. ~babashka.fs~ is
+a collection of functions for working with the filesystem; check out its [[https://github.com/babashka/fs][API
+docs]]. When you're writing shell scripts, you're very likely to work with the
+filesystem, so this namespace is going to be your friend.
+
+In this case, the ~read-entries~ function is using ~fs/exists?~ to check that
+~entries.edn~ exists before attempting to read it because ~slurp~ will throw an
+exception if it can't find the file for the path you passed it.
+
+The ~add-entry~ function gets the entries as a Clojure data structure, ~conj~s
+an entry, and then uses ~spit~ to write to ~entries.edn~. By default, ~spit~
+will overwrite a file; if you want to append to it, you would call it like
+
+#+begin_src clojure
+(spit "entries.edn" {:timestap 0 :entry ""} :append true)
+#+end_src
+
+** Handling command-line arguments
+
+In the last line we call ~(add-entry (first *command-line-args*))~.
+~*command-line-args*~ is a sequence containing, well, all the command line
+arguments that were passed to the script. If you created the file ~args.clj~
+with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2 3~, it would
+print ~("1" "2" "3")~.
+
+With this code we can add an entry by calling ~./journal "Flying!! But also
+naked :/"~. This gets us part of the way to our goal; we want to the interface
+to be ~./journal add "entry text"~
 
 
 * COMMENT outline
