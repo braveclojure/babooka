@@ -19,3 +19,7 @@
                          :entry     text}))))
 
 (add-entry (first *command-line-args*))
+
+(let [[command entry] *command-line-args*]
+  (case command
+    "add" (add-entry entry)))

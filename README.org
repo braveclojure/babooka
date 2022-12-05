@@ -88,10 +88,10 @@ read-eval-print loop (REPL) that gives you that good good bottom-up
 fast-feedback feeling. Script development is inherently a fast; Babashka makes
 it faster.
 
-*A built-in task interface.* One reason to write a shell script is to provide a
-concise, understandable interface for a complicated process. For example, you
-might write a build script that includes ~build~ and ~deploy~ commands that you
-call like
+*Built-in tools for defining your script's interface.* One reason to write a
+shell script is to provide a concise, understandable interface for a complicated
+process. For example, you might write a build script that includes ~build~ and
+~deploy~ commands that you call like
 
 #+begin_src bash
 ./my-script build
@@ -99,7 +99,8 @@ call like
 #+end_src
 
 Babashka comes with a task interface which gives you a consistent way of
-defining such commands. Take that, bash!
+defining such commands, and for parsing command-line arguments into Clojure data
+structures. Take that, bash!
 
 *A rich set of libraries.* Babashka comes with helper utilities for doing
 typical shell script grunt work like interacting with processes or mucking about
@@ -343,7 +344,7 @@ will overwrite a file; if you want to append to it, you would call it like
 (spit "entries.edn" {:timestap 0 :entry ""} :append true)
 #+end_src
 
-** Handling command-line arguments
+** Creating an interface
 
 In the last line we call ~(add-entry (first *command-line-args*))~.
 ~*command-line-args*~ is a sequence containing, well, all the command line
@@ -351,9 +352,41 @@ arguments that were passed to the script. If you created the file ~args.clj~
 with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2 3~, it would
 print ~("1" "2" "3")~.
 
-With this code we can add an entry by calling ~./journal "Flying!! But also
-naked :/"~. This gets us part of the way to our goal; we want to the interface
-to be ~./journal add "entry text"~
+With this code we can add an entry by calling ~./journal "Flying!! But to IHOP??"~.
+This is almost what we want; we actually want to call ~./journal add "entry text"~.
+The assumption here is that we'll want to have other commands like ~./journal
+list~ or ~./joural delete~.
+
+To accomplish this, we'll need to handle the commind line arguments in a more
+sophisticated way. The most obvious and least-effort way to do this would be to
+dispatch on the first argument to ~*command-line-args*~, something like this:
+
+#+BEGIN_SRC clojure
+(let [[command entry] *command-line-args*]
+  (case command
+    "add" (add-entry entry)))
+#+END_SRC
+
+This might be totally fine for your use case, but sometimes you want something
+more robust. You might want your script to:
+
+- List valid commands
+- Give an intelligent error message when a user calls a command that doesn't
+  exist (e.g. if the user calls ~./journal add-dream~ instead of ~./journal
+  add~)
+- Parse arguments, converting strings to keywords, numbers, vectors, maps, etc
+
+Generally speaking, *you want a clear and consistent way to define an interface
+for your script*. This interface is responsible for taking the data provided at
+the command line -- arguments passed to the script, as well as data piped in
+through ~stdin~ -- and using that data to handle these three responsibilities:
+
+- Dispatching to a Clojure function
+- Parsing command-line arguments into Clojure data, and passing that to the
+  dispatched functon
+- Providing feedback in cases where there's a problem performing the above
+  responsibilities.
+
 
 
 * COMMENT outline
