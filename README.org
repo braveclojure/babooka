@@ -58,7 +58,9 @@ From an implementation perspective, Babashka is a standalone, natively-compiled
 binary, meaning that it executes "directly" on the operating system, rather than
 runningin a JVM. When the babashka binary gets compiled, it includes many
 Clojure namespaces and libraries so that they are usable with native
-performance.
+performance. You can [[https://book.babashka.org/#libraries][check out the full list of built-in namespaces]]. Babashka
+can also include other libraries, just like if you're using deps.edn or
+Leiningen.
 
 The binary also includes the [[https://github.com/babashka/SCI][Small Clojure Interpreter (SCI)]] to interpret the
 Clojure you write and additional libraries you include on the fly. Its
@@ -116,12 +118,13 @@ And of course, you can add Clojure libraries as dependencies to accomplish even
 more. Clojure is a gateway drug to other programming paradigms, so if you ever
 wanted to do e.g. logic programming from the command line, now's your chance!
 
+*Good error messages.* TODO
+
 ** Installation
 
 Installing with brew is ~brew install borkdude/brew/babashka~.
 
 [[https://github.com/babashka/babashka#installation][For other systems, see Babashka's complete installation instructions.]]
-
 
 * Your first script
 
@@ -142,7 +145,7 @@ Create a file named ~hello.clj~ and put this in it:
 (str/join " " ["Hello" "inner" "world!"])
 #+end_src
 
-Now run it with
+Now run it with ~bb~, the babashka executable:
 
 #+begin_src clojure
 bb hello.clj
@@ -274,7 +277,7 @@ Here's what you learned in this section:
   ...)~.
 - Babashka writes the last value it encounters to ~stdout~
 
-* I/O and the filesystem
+* Working with files
 
 Shell scripts often need to read input from the command line and produce output
 somewhere, and our dream journal utility is no exception. It's going to store
@@ -294,11 +297,9 @@ for readability):
               was not disclosed in the listing."}]
 #+END_SRC
 
-To write to the journal, we want to run the command ~./journal add "Hamsters.
-Hamsters everywhere. Again."~. The result should be that a map gets appended to
-the vector.
-
-** Reading and writing files
+To write to the journal, we want to run the command ~./journal add --entry
+"Hamsters. Hamsters everywhere. Again."~. The result should be that a map gets
+appended to the vector.
 
 Let's get ourselves part of the way there. Create the file ~journal~ and make it
 executable with ~chmod +x journal~, then make it look like this:
@@ -344,16 +345,16 @@ will overwrite a file; if you want to append to it, you would call it like
 (spit "entries.edn" {:timestap 0 :entry ""} :append true)
 #+end_src
 
-** Creating an interface
+* Creating an interface for your script
 
 In the last line we call ~(add-entry (first *command-line-args*))~.
 ~*command-line-args*~ is a sequence containing, well, all the command line
-arguments that were passed to the script. If you created the file ~args.clj~
-with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2 3~, it would
-print ~("1" "2" "3")~.
+arguments that were passed to the script. If you were to create the file
+~args.clj~ with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2
+3~, it would print ~("1" "2" "3")~.
 
 With this code we can add an entry by calling ~./journal "Flying!! But to IHOP??"~.
-This is almost what we want; we actually want to call ~./journal add "entry text"~.
+This is almost what we want; we actually want to call ~./journal add --entry "entry text"~.
 The assumption here is that we'll want to have other commands like ~./journal
 list~ or ~./joural delete~.
 
@@ -362,7 +363,7 @@ sophisticated way. The most obvious and least-effort way to do this would be to
 dispatch on the first argument to ~*command-line-args*~, something like this:
 
 #+BEGIN_SRC clojure
-(let [[command entry] *command-line-args*]
+(let [[command _ entry] *command-line-args*]
   (case command
     "add" (add-entry entry)))
 #+END_SRC
@@ -374,7 +375,8 @@ more robust. You might want your script to:
 - Give an intelligent error message when a user calls a command that doesn't
   exist (e.g. if the user calls ~./journal add-dream~ instead of ~./journal
   add~)
-- Parse arguments, converting strings to keywords, numbers, vectors, maps, etc
+- Parse arguments, recognizing option flags and converting values to keywords,
+  numbers, vectors, maps, etc
 
 Generally speaking, *you want a clear and consistent way to define an interface
 for your script*. This interface is responsible for taking the data provided at
@@ -387,7 +389,26 @@ through ~stdin~ -- and using that data to handle these three responsibilities:
 - Providing feedback in cases where there's a problem performing the above
   responsibilities.
 
+The broader Clojure ecosystem provides two libraries for handling argument
+parsing:
 
+- [[https://github.com/clojure/tools.cli][clojure.tools.cli]]
+- [[https://github.com/nubank/docopt.clj][nubank/docopt.clj]]
+
+Babashka gives you an additional tool, the task system, that handles both
+dispatching and parsing. We'll look at clojure.tools.cli and tasks.
+
+** clojure.tools.cli
+
+clojure.tools.cli lets you create a kind of schema for command line options. For
+each option, you can define:
+
+- its short and long flags (e.g. ~-e~ and ~--entry~)
+- whether the argument is required
+- validation functions
+- help text
+- a default value
+- a parsing function
 
 * COMMENT outline
 ** What is babashka?

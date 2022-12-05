@@ -2,6 +2,7 @@
 
 (require '[babashka.fs :as fs])
 (require '[clojure.edn :as edn])
+(require '[clojure.tools.cli :as cli])
 
 (def ENTRIES-LOCATION "entries.edn")
 
@@ -20,6 +21,6 @@
 
 (add-entry (first *command-line-args*))
 
-(let [[command entry] *command-line-args*]
-  (case command
-    "add" (add-entry entry)))
+(def cli-opts
+  [["-e" "--entry ENTRY" "Text of your entry"
+    ]])
