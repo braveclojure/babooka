@@ -3,15 +3,15 @@
 * Introduction
 
 There are two types of programmers in the world: the practical, sensible,
-shell-resigned people who need to google the correct argument order for ~ln -s~
--- and those twisted, Stochholmed souls who will gleefully spend a weekend
-cooking up hundreds of lines of bash.
+shell-resigned people who need to google the correct argument order for ~ln -s~,
+and those twisted, Stochholmed souls who will gleefully spend a weekend cooking
+up hundreds of lines of bash.
 
 This guide is for the former. For the latter: sorry, but I can't help you.
 
 [[https://babashka.org][Babashka]] is a Clojure scripting runtime that is a powerful, delightful
-alternative to the shell scripts you're used to. This is a comprehensive
-tutorial that will help you understand:
+alternative to the shell scripts you're used to; this comprehensive tutorial
+will will help you understand:
 
 - What babashka is, what it does, how it works, and how it can fit into your
   toolset
@@ -27,10 +27,10 @@ then read on!
 
 From a user perspective, babashka is a scripting runtime for the Clojure
 programming language. It lets you execute Clojure programs in contexts where
-you'd typically used bash, ruby, python, and the like. Typical use cases of
-babashka include: build scripts, command line utilities, small web applications,
-git hooks, AWS Lambda functions, and everywhere you want to use Clojure where
-fast startup and/or low resource usage matters.
+you'd typically use bash, ruby, python, and the like. Use cases include build
+scripts, command line utilities, small web applications, git hooks, AWS Lambda
+functions, and everywhere you want to use Clojure where fast startup and/or low
+resource usage matters.
 
 You can run something like the following in a terminal to immediately execute
 your Clojure program:
