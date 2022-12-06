@@ -1,8 +1,8 @@
 #!/usr/bin/env bb
 
+(require '[babashka.cli :as cli])
 (require '[babashka.fs :as fs])
 (require '[clojure.edn :as edn])
-(require '[clojure.tools.cli :as cli])
 
 (def ENTRIES-LOCATION "entries.edn")
 
@@ -13,22 +13,32 @@
     []))
 
 (defn add-entry
-  [text]
+  [{:keys [opts]}]
   (let [entries (read-entries)]
     (spit ENTRIES-LOCATION
-          (conj entries {:timestamp (System/currentTimeMillis)
-                         :entry     text}))))
-
-(add-entry (first *command-line-args*))
+          (conj entries
+                (merge {:timestamp (System/currentTimeMillis)} ;; default timestamp
+                       opts)))))
 
 (def cli-opts
-  [["-e" "--entry ENTRY" "Text of your entry"]
-   ["-t" "--timestamp"
-    :parse-fn #(Integer/parseInt %)
-    :validate [nat-int? "Must be 0 or greater"]]])
-
-(def bb-cli-opts
   {:alias   {:e :entry
              :t :timestamp}
    :coerce  {:timestamp :long}
    :require [:entry]})
+
+(def table
+  [{:cmds ["add"] :fn add-entry}])
+
+(cli/dispatch table
+              *command-line-args*
+              cli-opts)
+
+(comment
+  (add-entry (first *command-line-args*))
+
+  ;; clojure.tools.cli format
+  (def cli-opts
+    [["-e" "--entry ENTRY" "Text of your entry"]
+     ["-t" "--timestamp"
+      :parse-fn #(Integer/parseInt %)
+      :validate [nat-int? "Must be 0 or greater"]]]))

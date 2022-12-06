@@ -470,8 +470,56 @@ for our dream journal:
 : Required option: :entry user
 #+END_SRC
 
+babashka.cli goes beyond option parsing to also giving you a way to dispatch
+subcommands, which is exactly what we want to get ~./journal add --entry "..."~
+working. Here's what the final version of ~journal~ looks like:
 
+#+BEGIN_SRC clojure
+#!/usr/bin/env bb
+(require '[babashka.cli :as cli])
+(require '[babashka.fs :as fs])
+(require '[clojure.edn :as edn])
 
+(def ENTRIES-LOCATION "entries.edn")
+
+(defn read-entries
+  []
+  (if (fs/exists? ENTRIES-LOCATION)
+    (edn/read-string (slurp ENTRIES-LOCATION))
+    []))
+
+(defn add-entry
+  [{:keys [opts]}]
+  (let [entries (read-entries)]
+    (spit ENTRIES-LOCATION
+          (conj entries
+                (merge {:timestamp (System/currentTimeMillis)} ;; default timestamp
+                       opts)))))
+
+(def cli-opts
+  {:alias   {:e :entry
+             :t :timestamp}
+   :coerce  {:timestamp :long}
+   :require [:entry]})
+
+(def table
+  [{:cmds ["add"] :fn add-entry}])
+
+(cli/dispatch table
+              *command-line-args*
+              cli-opts)
+#+END_SRC
+
+The function ~cli/dispatch~ at the bottom takes a dispatch table as its first
+argument. ~cli/dispatch~ figures out which of the arguments you passed in at the
+command line correspond to commands (~"add"~ in this case), and then calls the
+corresponding ~:fn~ (~add-entry~ in this case).
+
+The dispatched function receives a map as its argument, and that map contains
+the ~:opts~ key. This is a map of parsed command line options, and we use it to
+build our dream journal entry in the ~add-entry~ function.
+
+And that, my friends, is how you build an interface for your script!
 
 * COMMENT outline
 ** What is babashka?
