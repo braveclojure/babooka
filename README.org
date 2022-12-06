@@ -389,14 +389,15 @@ through ~stdin~ -- and using that data to handle these three responsibilities:
 - Providing feedback in cases where there's a problem performing the above
   responsibilities.
 
-The broader Clojure ecosystem provides two libraries for handling argument
-parsing:
+The broader Clojure ecosystem provides at least two libraries for handling
+argument parsing:
 
 - [[https://github.com/clojure/tools.cli][clojure.tools.cli]]
 - [[https://github.com/nubank/docopt.clj][nubank/docopt.clj]]
 
-Babashka gives you an additional tool, the task system, that handles both
-dispatching and parsing. We'll look at clojure.tools.cli and tasks.
+Babashka provides the [[https://github.com/babashka/cli][babashka.cli library]] for both parsing options and
+dispatches subcommands. We'll briefly look at clojure.tools.cli, then focus on
+babashka.cli.
 
 ** clojure.tools.cli
 
@@ -409,6 +410,68 @@ each option, you can define:
 - help text
 - a default value
 - a parsing function
+
+Here's what that would look like:
+
+#+begin_src clojure
+(require '[clojure.tools.cli :as cli])
+(def cli-opts
+  [["-e" "--entry ENTRY" "Text of your entry"]
+   ["-t" "--timestamp"
+    :parse-fn #(Integer/parseInt %)
+    :validate [nat-int? "Must be 0 or greater"]]])
+
+(cli/parse-opts ["-e" "dreamt I was a butterfly"] cli-opts)
+;; =>
+{:options {:entry "dreamt I was a butterfly"},
+ :arguments [],
+ :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
+ :errors nil}
+#+end_src
+
+The first schema, ~["-e" "--entry ENTRY" "Text of your entry"]~ gives the short
+and long flags and a description that can be used to produce help text. In
+~"--entry ENTRY"~, the presence of ~ENTRY~ indicates that the argument is
+required:
+
+#+CAPTION:
+#+BEGIN_SRC clojure
+(cli/parse-opts ["-e"] cli-opts)
+;; =>
+{:options {},
+ :arguments [],
+ :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
+ :errors ["Missing required argument for \"-e ENTRY\""]}
+#+END_SRC
+
+See the [[https://github.com/clojure/tools.cli][clojure.tools.cli docs]] for more info!
+
+** babashka.cli
+
+The [[https://github.com/babashka/cli][babashka.cli docs]] do a good job of explaining how to use the library to meet
+all your command line parsing needs. Here I'll just show you how we'll use it
+for our dream journal:
+
+#+BEGIN_SRC clojure
+(require '[babashka.cli :as bb-cli])
+(def bb-cli-opts
+  {:alias   {:e :entry
+             :t :timestamp}
+   :coerce  {:timestamp :long}
+   :require [:entry]})
+
+(bb-cli/parse-opts ["-e" "The toast had eyes :("] bb-cli-opts)
+;; =>
+{:entry "The toast had eyes :("}
+
+;; leaving out a required flag throws an exception:
+(bb-cli/parse-opts [] bb-cli-opts)
+;; exception gets thrown, this gets printed:
+: Required option: :entry user
+#+END_SRC
+
+
+
 
 * COMMENT outline
 ** What is babashka?

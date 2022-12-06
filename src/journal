@@ -22,5 +22,13 @@
 (add-entry (first *command-line-args*))
 
 (def cli-opts
-  [["-e" "--entry ENTRY" "Text of your entry"
-    ]])
+  [["-e" "--entry ENTRY" "Text of your entry"]
+   ["-t" "--timestamp"
+    :parse-fn #(Integer/parseInt %)
+    :validate [nat-int? "Must be 0 or greater"]]])
+
+(def bb-cli-opts
+  {:alias   {:e :entry
+             :t :timestamp}
+   :coerce  {:timestamp :long}
+   :require [:entry]})
