@@ -457,10 +457,12 @@ options:
 #+BEGIN_SRC clojure
 (require '[babashka.cli :as cli])
 (def cli-opts
-  {:alias   {:e :entry
-             :t :timestamp}
-   :coerce  {:timestamp :long}
-   :require [:entry]})
+  {:entry     {:alias   :e
+               :desc    "Your dreams."
+               :require true}
+   :timestamp {:alias  :t
+               :desc   "A unix timestamp, when you recorded this."
+               :coerce {:timestamp :long}}})
 
 (cli/parse-opts ["-e" "The toast had eyes :("] cli-opts)
 ;; =>
@@ -504,16 +506,18 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
                        opts)))))
 
 (def cli-opts
-  {:alias   {:e :entry
-             :t :timestamp}
-   :coerce  {:timestamp :long}
-   :require [:entry]})
+  {:entry     {:alias   :e
+               :desc    "Your dreams."
+               :require true}
+   :timestamp {:alias  :t
+               :desc   "A unix timestamp, when you recorded this."
+               :coerce {:timestamp :long}}})
 
 (def table
   [{:cmds ["add"] :fn add-entry}])
 
 (cli/dispatch table
-              *command-line-args*
+              ,*command-line-args*
               cli-opts)
 #+END_SRC
 
