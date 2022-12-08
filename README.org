@@ -717,10 +717,32 @@ reverse-chronologial order, just like we want. Yay!
 - Put the map ~{:paths ["src"]}~ in ~bb.edn~ to tell Babashka where to find the
   files for namespaces
 
-
 * Adding dependencies
 
+You can add dependencies to your projects by adding a ~:deps~ key to your
+~bb.edn~ file, resulting in something like this:
 
+#+begin_src clojure
+{:paths ["src"]
+ :deps {medley/medley {:mvn/version "1.3.0"}}}
+#+end_src
+
+What's cool about Babashka though is that you can also add deps directly in your
+script, or even in the repl, like so:
+
+#+begin_src clojure
+(require '[babashka.deps :as deps])
+(deps/add-deps '{:deps {medley/medley {:mvn/version "1.3.0"}}})
+#+end_src
+
+This is in keeping with the nature of a scripting language, which should enable
+quick, low-ceremony development.
+
+At this point you shoudl be fully equipped to start writing your own Clojure
+shell scripts with Babashka. Woohoo!
+
+In the sections that follow, I'll cover aspects of Babashka that you might not
+need immediately but that are useful.
 
 * Using pods
 * Other ways of executing code
