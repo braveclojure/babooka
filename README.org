@@ -531,6 +531,43 @@ the ~:opts~ key. This is a map of parsed command line options, and we use it to
 build our dream journal entry in the ~add-entry~ function.
 
 And that, my friends, is how you build an interface for your script!
+** Summary
+
+- For scripts of any complexity, you generally need to /parse/ the command line
+  options into Clojure data structures
+- Your script might provide /subcommands/, e.g. ~add~ in ~journal add~, and you
+  will need to map the command line arguments to the appropriate function in
+  your script
+- The libraries ~clojure.tools.cli~ and ~nubank/docopts~ will parse command line
+  arguments into options for you
+- I prefer using ~babashka.cli~ because it also handles subcommand dispatch, but
+  really this decision is a matter of taste
+
+* Organizing your project
+
+You can now record your subconscious's nightly improv routine. That's great!
+High on this accomplishment, you decide to kick things up a notch and add the
+ability to list your entries. You want to run ~./journal list~ and have your
+script return something like this:
+
+#+begin_src
+2022-12-07 08:03am
+There were two versions of me, and one version baked the other into a pie and ate it.
+Feeling both proud and disturbed.
+
+2022-12-06 07:43am
+Was on a boat, but the boat was powered by cucumber sandwiches, and I had to keep
+making those sandwiches so I wouldn't get stranded at sea.
+#+end_src
+
+You read somewhere that source files should be AT MOST 50 lines long, so you
+decide that you want to put this list functionality in its own file. How do you
+do that?
+
+* Adding dependencies
+* Using pods
+* Other ways of executing code
+* Appendix: What is shell scripting?
 
 * COMMENT outline
 ** What is babashka?
