@@ -464,12 +464,12 @@ options:
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
 
-(cli/parse-opts ["-e" "The toast had eyes :("] cli-opts)
+(cli/parse-opts ["-e" "The toast had eyes :("] {:spec cli-opts})
 ;; =>
 {:entry "The toast had eyes :("}
 
 ;; leaving out a required flag throws an exception:
-(cli/parse-opts [] cli-opts)
+(cli/parse-opts [] {:spec cli-opts})
 ;; exception gets thrown, this gets printed:
 : Required option: :entry user
 #+END_SRC
@@ -518,7 +518,7 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
 
 (cli/dispatch table
               ,*command-line-args*
-              cli-opts)
+              {:spec cli-opts})
 #+END_SRC
 
 The function ~cli/dispatch~ at the bottom takes a dispatch table as its first
@@ -622,7 +622,7 @@ With this in place, we'll now update ~journal~ so that it looks like this:
 
 (cli/dispatch table
               *command-line-args*
-              cli-opts)
+              {:spec cli-opts})
 #+end_src
 
 Now it's only responsible for parsing command line arguments and dispatching to
@@ -678,6 +678,27 @@ To finish our tour of our new project organization, here's
     []))
 #+end_src
 
+If you call ~./journal add -e "visited by the tooth fairy, except he was a
+balding 45-year-old man with a potbelly from Brooklyn"~, it should still work.
+
+Now lets create a the ~journal.list~ namespace. Open the file
+~src/journal/list.clj~ and put this in it:
+
+#+begin_src clojure
+(ns journal.list
+  (:require
+   [journal.utils :as utils]))
+
+(defn list-entries
+  [_]
+  (let [entries (utils/read-entries)]
+    (doseq [{:keys [timestamp entry]} (reverse entries)]
+      (println timestamp)
+      (println entry "\n"))))
+#+end_src
+
+This doesn't format the timestamp, but other than that it lists our entries in
+reverse-chronologial order, just like we want. Yay!
 
 * Adding dependencies
 * Using pods

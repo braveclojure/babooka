@@ -33,7 +33,7 @@
 
 (cli/dispatch table
               *command-line-args*
-              cli-opts)
+              {:spec cli-opts})
 
 (comment
   (add-entry (first *command-line-args*))

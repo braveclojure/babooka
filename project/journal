@@ -2,6 +2,7 @@
 
 (require '[babashka.cli :as cli])
 (require '[journal.add :as add])
+(require '[journal.list :as list])
 
 (def cli-opts
   {:entry     {:alias   :e
@@ -12,8 +13,9 @@
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn add/add-entry}])
+  [{:cmds ["add"] :fn add/add-entry}
+   {:cmds ["list"] :fn list/list-entries}])
 
 (cli/dispatch table
               *command-line-args*
-              cli-opts)
+              {:spec cli-opts})
