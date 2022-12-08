@@ -1,0 +1,19 @@
+#!/usr/bin/env bb
+
+(require '[babashka.cli :as cli])
+(require '[journal.add :as add])
+
+(def cli-opts
+  {:entry     {:alias   :e
+               :desc    "Your dreams."
+               :require true}
+   :timestamp {:alias  :t
+               :desc   "A unix timestamp, when you recorded this."
+               :coerce {:timestamp :long}}})
+
+(def table
+  [{:cmds ["add"] :fn add/add-entry}])
+
+(cli/dispatch table
+              *command-line-args*
+              cli-opts)

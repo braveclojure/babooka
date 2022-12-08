@@ -560,13 +560,129 @@ Was on a boat, but the boat was powered by cucumber sandwiches, and I had to kee
 making those sandwiches so I wouldn't get stranded at sea.
 #+end_src
 
-You read somewhere that source files should be AT MOST 50 lines long, so you
-decide that you want to put this list functionality in its own file. How do you
-do that?
+You read somewhere that source files should be AT MOST 25 lines long, so you
+decide that you want to split up your codebase and put this list functionality
+in its own file. How do you do that?
+
+You can organize your Babashka projects just like your other Clojure projects,
+splitting your codebase into separate files, with each file defining a namespace
+and with namespaces corresponding to file names. Let's reorganize our current
+codebase a bit, making sure everything still works, and then add a namespace for
+listing entries.
+
+One way to organize our dream journal project would be to create the following
+file structure:
+
+#+begin_src
+./journal
+./src/journal/add.clj
+./src/journal/utils.clj
+#+end_src
+
+Already, you can see that this looks both similar to typical Clojure project
+file structures, and a bit different. We're placing our namespaces in the
+~src/journal~ directory, which lines up with what you'd see in JVM or
+ClojureScript projects. What's different in our Babashka project is that we're
+still using ~./journal~ to serve as the executable entry point for our program,
+rather than the convention of using ~./src/journal/core.clj~ or something like
+that. This might feel a little weird but it's valid and it's still Clojure.
+
+And like other Clojure environments, you need to tell Babashka to look in the
+~src~ directory when you require namespaces. You do that by creating the file
+~bb.edn~ in the same directory as ~journal~ and putting this in it:
+
+#+begin_src clojure
+{:paths ["src"]}
+#+end_src
+
+~bb.edn~ is similar to a ~deps.edn~ file in that one of its responsibilities is
+telling Babashka how to construct your classpath. The classpath is the set of
+the directories that Babashka should look in when you require namespaces, and by
+adding ~"src"~ to it you can use ~(require '[journal.add])~ in your project.
+Babashka will be able to find the corresponding file.
+
+With this in place, we'll now update ~journal~ so that it looks like this:
+
+#+begin_src clojure
+#!/usr/bin/env bb
+
+(require '[babashka.cli :as cli])
+(require '[journal.add :as add])
+
+(def cli-opts
+  {:entry     {:alias   :e
+               :desc    "Your dreams."
+               :require true}
+   :timestamp {:alias  :t
+               :desc   "A unix timestamp, when you recorded this."
+               :coerce {:timestamp :long}}})
+
+(def table
+  [{:cmds ["add"] :fn add/add-entry}])
+
+(cli/dispatch table
+              *command-line-args*
+              cli-opts)
+#+end_src
+
+Now it's only responsible for parsing command line arguments and dispatching to
+the correct function.
+
+You can see on line 4 that we're requiring a new namespace, ~journal.add~. The
+file corresponding to this namespace is ~./src/journal/add.clj~. Here's what
+that looks like:
+
+#+caption:
+#+begin_src clojure
+(ns journal.add
+  (:require
+   [journal.utils :as utils]))
+
+(defn add-entry
+  [{:keys [opts]}]
+  (let [entries (utils/read-entries)]
+    (spit utils/ENTRIES-LOCATION
+          (conj entries
+                (merge {:timestamp (System/currentTimeMillis)} ;; default timestamp
+                       opts)))))
+#+end_src
+
+Look, it's a namespace declaration! And that namespace declaration has a
+~(:require ...)~ block. When you write Babashka scripts, you can forego
+declaring a namespace if all your code is in one file, like in the original
+version of ~journal~. However, once you start splitting your code into multiple
+files, the normal rules of Clojure project organization apply:
+
+- Namespace names must correspond to filesystem paths. If you want to name a
+  namespace ~journal.add~, Babashka must be able to find it at
+  ~journal/add.clj~.
+- You must tell Babashka where to look to find the files that correspond to
+  namespaces. You do this by creating a ~bb.edn~ file and putting ~{:paths
+  ["src"]}~ in it.
+
+To finish our tour of our new project organization, here's
+~./src/journal/utils.clj~:
+
+#+begin_src clojure
+(ns journal.utils
+  (:require
+   [babashka.fs :as fs]
+   [clojure.edn :as edn]))
+
+(def ENTRIES-LOCATION "entries.edn")
+
+(defn read-entries
+  []
+  (if (fs/exists? ENTRIES-LOCATION)
+    (edn/read-string (slurp ENTRIES-LOCATION))
+    []))
+#+end_src
+
 
 * Adding dependencies
 * Using pods
 * Other ways of executing code
+*
 * Appendix: What is shell scripting?
 
 * COMMENT outline
