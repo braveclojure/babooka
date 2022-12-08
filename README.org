@@ -570,6 +570,8 @@ and with namespaces corresponding to file names. Let's reorganize our current
 codebase a bit, making sure everything still works, and then add a namespace for
 listing entries.
 
+** File system structure
+
 One way to organize our dream journal project would be to create the following
 file structure:
 
@@ -601,6 +603,11 @@ the directories that Babashka should look in when you require namespaces, and by
 adding ~"src"~ to it you can use ~(require '[journal.add])~ in your project.
 Babashka will be able to find the corresponding file.
 
+Note that there is nothign special about the ~"src"~ directory. You could use
+~"my-code"~ or even ~"."~ if you wanted, and you can add more than one path.
+~"src"~ is just the convention preferred by discerning Clojurians the world
+over.
+
 With this in place, we'll now update ~journal~ so that it looks like this:
 
 #+begin_src clojure
@@ -625,8 +632,11 @@ With this in place, we'll now update ~journal~ so that it looks like this:
               {:spec cli-opts})
 #+end_src
 
-Now it's only responsible for parsing command line arguments and dispatching to
-the correct function.
+Now the file is only responsible for parsing command line arguments and
+dispatching to the correct function. The add functionality has been moved to
+another namespace.
+
+** Namespaces
 
 You can see on line 4 that we're requiring a new namespace, ~journal.add~. The
 file corresponding to this namespace is ~./src/journal/add.clj~. Here's what
@@ -700,7 +710,18 @@ Now lets create a the ~journal.list~ namespace. Open the file
 This doesn't format the timestamp, but other than that it lists our entries in
 reverse-chronologial order, just like we want. Yay!
 
+** Summary
+
+- Namespaces work like they do in JVM Clojure and Clojurescript: namespace names
+  must correspond to file system structure
+- Put the map ~{:paths ["src"]}~ in ~bb.edn~ to tell Babashka where to find the
+  files for namespaces
+
+
 * Adding dependencies
+
+
+
 * Using pods
 * Other ways of executing code
 *
