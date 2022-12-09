@@ -5,7 +5,7 @@
 
 There are two types of programmers in the world: the practical, sensible,
 shell-resigned people who need to google the correct argument order for ~ln -s~,
-and those twisted, Stochholmed souls who will gleefully spend a weekend cooking
+and those twisted, Stockholmed souls who will gleefully spend a weekend cooking
 up hundreds of lines of bash.
 
 This guide is for the former. For the latter: sorry, but I can't help you.
@@ -92,7 +92,7 @@ X-developed script is broken in your continuous integration pipeline.
 *Interactive Development.* Following the lisp tradition, Babashka provides a
 read-eval-print loop (REPL) that gives you that good good bottom-up
 fast-feedback feeling. Script development is inherently a fast; Babashka makes
-it faster.
+it a faster.
 
 *Built-in tools for defining your script's interface.* One reason to write a
 shell script is to provide a concise, understandable interface for a complicated
@@ -833,6 +833,7 @@ TODO
 The following people read drafts of this and gave feedback. Thank you!
 
 - Michiel Borkent
+- Marcela Poffalo
 - Gabriel Horner
 
 * COMMENT outline
