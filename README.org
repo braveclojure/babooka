@@ -1,4 +1,4 @@
-#+title: Babashka Babooka
+#+title: Babashka Babooka: Writing Command Line Clojure
 
 
 * Introduction
@@ -86,6 +86,9 @@ multiple databases in parallel.
 *Real testing.* You can unit test your Babashka code just as you would any other
 Clojure project, and you can use other testing libraries as you see fit.
 
+*Cross-platform compatibility.* It's nice not having to worry that an OS
+X-developed script is broken in your continuous integration pipeline.
+
 *Interactive Development.* Following the lisp tradition, Babashka provides a
 read-eval-print loop (REPL) that gives you that good good bottom-up
 fast-feedback feeling. Script development is inherently a fast; Babashka makes
@@ -119,7 +122,8 @@ And of course, you can add Clojure libraries as dependencies to accomplish even
 more. Clojure is a gateway drug to other programming paradigms, so if you ever
 wanted to do e.g. logic programming from the command line, now's your chance!
 
-*Good error messages.* TODO
+*Good error messages.* Babashka's error handling is the friendliest of all
+Clojure implementations, directing you precisely to where an error occurred.
 
 ** Installation
 
@@ -823,6 +827,13 @@ TODO
 
 - [[https://github.com/babashka/babashka/wiki/Bash-and-Babashka-equivalents][Bash and Babashka equivalents]] is indispensable for transferring your Bash
   knowledge to Babashka
+
+* Acknowledgments
+
+The following people read drafts of this and gave feedback. Thank you!
+
+- Michiel Borkent
+- Gabriel Horner
 
 * COMMENT outline
 ** What is babashka?
