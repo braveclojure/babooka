@@ -827,6 +827,14 @@ command internally, and send a response message to the client.
 
 The pod protocol is documented in [[https://github.com/babashka/pods][the pod GitHub repo]].
 
+** Summary
+
+- Babashka's pod system lets you interact with external processes using Clojure
+  functions, as opposed to shelling out with ~babashka.process/shell~ or making
+  HTTP requests, or something like that
+- Those external processes are called /pods/ and must implement the /pod
+  protocol/ to tell client programs how to interact with them
+
 * Other ways of executing code
 
 TODO
