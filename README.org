@@ -776,7 +776,7 @@ script, or even in the repl, like so:
 This is in keeping with the nature of a scripting language, which should enable
 quick, low-ceremony development.
 
-At this point you shoudl be fully equipped to start writing your own Clojure
+At this point you should be fully equipped to start writing your own Clojure
 shell scripts with Babashka. Woohoo!
 
 In the sections that follow, I'll cover aspects of Babashka that you might not
@@ -799,24 +799,31 @@ it's written in Haskell, and furthermore it has a /terminal user interface/
 (TUI) rather than a command-line interface.
 
 That is, when you run ~stash~ from the command line it "draws" an ascii
-interface in your terminal, and you must enter additional characters to store
-text. You can't store text directly from the command line with something like
-~stash store dreams.stash --key 20221210092035 --value "was worried that
-something was wrong with the house's foundation, then the whole thing fell into
-a sinkhole that kept growing until it swallowed the whole neighborhood"~.
+interface in your terminal, and you must provide additional input to store text.
+You can't store text directly from the command line with something like
+
+#+begin_src bash
+stash store dreams.stash \
+      --key 20221210092035 \
+      --value "was worried that something was wrong with the house's foundation,
+               then the whole thing fell into a sinkhole that kept growing until
+               it swallowed the whole neighborhood"
+#+end_src
+
 
 If that were possible, then you could use ~stash~ from within your Bashka
-project by using the ~babashka.process~ namespace, like this:
+project by using the ~babashka.process/shell~ function, like this:
 
 #+begin_src clojure
 (require '[babashka.process :as bp])
 (bp/shell "stash store dreams.stash --key 20221210092035 --value \"...\"")
 #+end_src
 
-~bp/shell~ is a function you can use to take advantage of a program's
-command-line interface; but again, ~stash~ doesn't provide that.
+~bp/shell~ is lets you take advantage of a program's command-line interface; but
+again, ~stash~ doesn't provide that.
 
-However, ~stash~ provides a /pod interface/, so we can use it like this:
+However, ~stash~ provides a /pod interface/, so we can use it like this in a
+Clojure file:
 
 #+begin_src clojure
 (require '[babashka.pods :as pods])
