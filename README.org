@@ -952,6 +952,46 @@ $ bb -m journal.add "recurring foo dream"
 Note that for ~bb -x~ or ~bb -m~ to work, you must set up your ~bb.edn~ file so
 that the namespace you're invoking is reachable on the classpath.
 
+** Tasks
+
+Another flavor of running command line programs is to call them similarly to
+~make~ and ~npm~. In your travels as a programmer, you might have run these at
+the command line:
+
+#+begin_src bash
+make install
+npm build
+npm run build
+npm run dev
+#+end_src
+
+Babashka allows you to write commands similarly. For our dream journal, we might
+want to be able to execute the following in a terminal:
+
+#+begin_src bash
+bb add -e "I was Neo in the Matrix, except all my kung fu moves had sad trombone sound effects"
+bb list
+#+end_src
+
+You enable this by adding /tasks/ to your ~bb.edn~ file:
+
+#+begin_src clojure
+{:paths ["src"]
+ :tasks {add  (exec 'journal.add/add-entry)
+         list (exec 'journal.list/list-entries)}}
+#+end_src
+
+Now you can do this:
+
+#+begin_src bash
+$ bb add --entry "dreamt I was done writing a tutorial. bliss"
+
+$ bb list
+1670718856173
+dreamt I was done writing a tutorial. bliss
+#+end_src
+
+There's a lot more to the task system that I'm not going to cover here.
 
 * Distributing a Babashka program
 
