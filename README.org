@@ -53,7 +53,7 @@ Java runs. The other main target is JavaScript, allowing Clojure to run in a
 browser. With Babashka, you can now run Clojure programs where you'd normally
 run bash scripts. The time you spend investing in Clojure pays dividends as your
 knowledge transfers to these varied environments. (Note that this tutorial
-assumes basic familiarity with Clojure.)
+assumes [[https://www.braveclojure.com/do-things/][basic familiarity with Clojure]].)
 
 From an implementation perspective, Babashka is a standalone, natively-compiled
 binary, meaning that it executes "directly" on the operating system, rather than
