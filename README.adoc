@@ -4,7 +4,7 @@ Daniel Higginbotham
 
 
 
-== Introduction ==
+= Introduction =
 There are two types of programmers in the world: the practical, sensible,
 shell-resigned people who need to google the correct argument order for `ln -s`,
 and those twisted, Stockholmed souls who will gleefully spend a weekend cooking
@@ -27,7 +27,7 @@ scripts) and start doing something that feels great (writing Babashka scripts),
 then read on!
 
 
-=== What is Babashka? ===
+== What is Babashka? ==
 From a user perspective, babashka is a scripting runtime for the Clojure
 programming language. It lets you execute Clojure programs in contexts where
 you'd typically use bash, ruby, python, and the like. Use cases include build
@@ -75,7 +75,7 @@ implementation in depth, but you can learn more about it by reading https://medi
 on the GraalVM blog].
 
 
-=== Why should you use it? ===
+== Why should you use it? ==
 I won't go into the benefits of Clojure itself because there are plenty of
 materials on that https://jobs-blog.braveclojure.com/2022/03/24/long-term-clojure-benefits.html[elsewhere].
 
@@ -134,13 +134,13 @@ wanted to do e.g. logic programming from the command line, now's your chance!
 Clojure implementations, directing you precisely to where an error occurred.
 
 
-=== Installation ===
+== Installation ==
 Installing with brew is `brew install borkdude/brew/babashka`.
 
 https://github.com/babashka/babashka#installation[For other systems, see Babashka's complete installation instructions.]
 
 
-== Your first script ==
+= Your first script =
 Throughout this tutorial we're going to play with building a little CLI-based
 dream journal. Why? Because the idea of you nerds recording your weird little
 subconscious hallucinations is deeply amusing to me.
@@ -193,7 +193,7 @@ different, but this is still Clojure. Let's explore the other points in more
 detail.
 
 
-=== Babashka's output ===
+== Babashka's output ==
 Here's what's going on: `bb` interprets the Clojure code you've written,
 executing it on the fly. It prints the last value it encounters to `stdout`,
 which is why `"Hello, inner world!"` is returned in your terminal.
@@ -222,7 +222,7 @@ nil
 With `nil` as the last form, `bb` does not print to `stdout` on exit.
 
 
-=== Namespace is optional ===
+== Namespace is optional ==
 As for the lack of namespace: this is part of what makes Babashka useful as a
 scripting tool. When you're in a scripting state of mind, you want to start
 hacking on ideas immediately; you don't want to have to deal with boilerplate
@@ -245,7 +245,7 @@ bit in this specific context. It provides a scripting experience that's more in
 line with what you'd expect from using other scripting languages.
 
 
-=== What about requiring other namespaces? ===
+== What about requiring other namespaces? ==
 You might want to include a namespace declaration because you want to require
 other namespaces. With JVM Clojure and Clojurescript, you require other
 namespaces like this:
@@ -264,7 +264,7 @@ That's not the case with Babashka. You'll see `(require ...)` used liberally in
 other examples, and it's OK for you to do that too.
 
 
-=== Executable script ===
+== Executable script ==
 What if you want to execute your script by typing something like `./hello`
 instead of `bb hello.clj`? You just need to rename your file, add a shebang, and
 `chmod +x` that bad boy. Update `hello.clj` to read:
@@ -286,7 +286,7 @@ chmod +x hello
 ----
 
 
-=== Summary ===
+== Summary ==
 Here's what you learned in this section:
 
 * You can run scripts with `bb script-name.clj`
@@ -299,7 +299,7 @@ still runs and it's still Clojure!
 * Babashka writes the last value it encounters to `stdout`
 
 
-== Working with files ==
+= Working with files =
 Shell scripts often need to read input from the command line and produce output
 somewhere, and our dream journal utility is no exception. It's going to store
 entries in the file `entries.edn`. The journal will be a vector, and each entry
@@ -370,7 +370,7 @@ will overwrite a file; if you want to append to it, you would call it like
 ----
 
 
-== Creating an interface for your script ==
+= Creating an interface for your script =
 In the last line we call `(add-entry (first *command-line-args*))`.
 `*command-line-args*` is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
@@ -425,7 +425,7 @@ dispatches subcommands. We'll briefly look at clojure.tools.cli, then focus on
 babashka.cli.
 
 
-=== clojure.tools.cli ===
+== clojure.tools.cli ==
 clojure.tools.cli lets you create a kind of schema for command line options. For
 each option, you can define:
 
@@ -474,7 +474,7 @@ error message:
 See the https://github.com/clojure/tools.cli[clojure.tools.cli docs] for more info!
 
 
-=== babashka.cli ===
+== babashka.cli ==
 The https://github.com/babashka/cli[babashka.cli docs] do a good job of explaining how to use the library to meet
 all your command line parsing needs. Rather than going over every option, I'll
 just focus on what we need to build our dream journal. Here's how we parse
@@ -562,7 +562,7 @@ TODO describe printing a summary
 
 And that, my friends, is how you build an interface for your script!
 
-=== Summary ===
+== Summary ==
 * For scripts of any complexity, you generally need to _parse_ the command line
 options into Clojure data structures
 * Your script might provide _subcommands_, e.g. `add` in `journal add`, and you
@@ -574,7 +574,7 @@ arguments into options for you
 really this decision is a matter of taste
 
 
-== Organizing your project ==
+= Organizing your project =
 You can now record your subconscious's nightly improv routine. That's great!
 High on this accomplishment, you decide to kick things up a notch and add the
 ability to list your entries. You want to run `./journal list` and have your
@@ -602,7 +602,7 @@ codebase a bit, making sure everything still works, and then add a namespace for
 listing entries.
 
 
-=== File system structure ===
+== File system structure ==
 One way to organize our dream journal project would be to create the following
 file structure:
 
@@ -671,7 +671,7 @@ dispatching to the correct function. The add functionality has been moved to
 another namespace.
 
 
-=== Namespaces ===
+== Namespaces ==
 You can see on line 4 that we're requiring a new namespace, `journal.add`. The
 file corresponding to this namespace is `./src/journal/add.clj`. Here's what
 that looks like:
@@ -775,14 +775,14 @@ in the `journal` file. That file should now look like this:
 ----
 
 
-=== Summary ===
+== Summary ==
 * Namespaces work like they do in JVM Clojure and Clojurescript: namespace names
 must correspond to file system structure
 * Put the map `{:paths ["src"]}` in `bb.edn` to tell Babashka where to find the
 files for namespaces
 
 
-== Adding dependencies ==
+= Adding dependencies =
 You can add dependencies to your projects by adding a `:deps` key to your
 `bb.edn` file, resulting in something like this:
 
@@ -812,14 +812,14 @@ need immediately but that will be useful to you as your love of Clojure
 scripting grows until it becomes all-consuming.
 
 
-== Pods ==
+= Pods =
 Babashka _pods_ introduce a way to interact with external processes by calling
 Clojure functions, so that you can write code that looks and feels like Clojure
 (because it is) even when working with a process that's running outside your
 Clojure application, and even when that process is written in another language.
 
 
-=== Pod usage ===
+== Pod usage ==
 Let's look at what that means in more concrete terms. Suppose you want to
 encrypt your dream journal. You find out about https://github.com/rorokimdim/stash[stash], "a command line program
 for storing text data in encrypted form." This is exactly what you need! Except
@@ -869,7 +869,7 @@ out or make HTTP calls or something like that.
 In the next section I'll explain the rest of the snippet above.
 
 
-=== Pod implementation ===
+== Pod implementation ==
 Where does the `stash/set` function come from? Both the namespace
 `pod.rorokimdim.stash` and the functions in it are dynamically generated by the
 call `(pods/load-pod 'rorokimdim/stash "0.3.1")`.
@@ -891,7 +891,7 @@ command internally, and send a response message to the client.
 The pod protocol is documented in https://github.com/babashka/pods[the pod GitHub repo].
 
 
-=== Summary ===
+== Summary ==
 * Babashka's pod system lets you interact with external processes using Clojure
 functions, as opposed to shelling out with `babashka.process/shell` or making
 HTTP requests, or something like that
@@ -899,7 +899,7 @@ HTTP requests, or something like that
 protocol_ to tell client programs how to interact with them
 
 
-== Other ways of executing code ==
+= Other ways of executing code =
 This tutorial has focused on helping you build a standalone script that you
 interact with like would a typical bash script script: you make it executable
 with `chmod +x` and you call it from the command line like `./journal add -e
@@ -913,7 +913,7 @@ supports:
 * Naming tasks
 
 
-=== Direct Expression Evaluation ===
+== Direct Expression Evaluation ==
 You can give Babashka a Clojure expression and it will evaluate it and print the
 result:
 
@@ -929,7 +929,7 @@ $ bb -e '(map inc [1 2 3])'
 Personally I haven't used this much myself, but it's there if you need it!
 
 
-=== Invoking a Clojure function ===
+== Invoking a Clojure function ==
 If we wanted to call our `journal.add/add-entry` function directly, we could do
 this:
 
@@ -992,7 +992,7 @@ Note that for `bb -x` or `bb -m` to work, you must set up your `bb.edn` file so
 that the namespace you're invoking is reachable on the classpath.
 
 
-== Tasks ==
+= Tasks =
 Another flavor of running command line programs is to call them similarly to
 `make` and `npm`. In your travels as a programmer, you might have run these at
 the command line:
@@ -1017,7 +1017,7 @@ bb list
 We're going to build up to that in small steps.
 
 
-=== A basic task ===
+== A basic task ==
 First, let's look at a very basic task definition. Tasks are defined in your
 `bb.edn` file. Update yours to look like this:
 
@@ -1041,7 +1041,7 @@ if you want them to be sent to `stdout`; this wouldn't print anything:
 ----
 
 
-=== How to require namespaces for tasks ===
+== How to require namespaces for tasks ==
 Let's say you wanted to create a task to delete your journal entries. Here's
 what that would looke like:
 
@@ -1075,7 +1075,7 @@ Instead, to require namespaces you must do so like this:
 ----
 
 
-=== Use `exec` to parse arguments and call a function ===
+== Use `exec` to parse arguments and call a function ==
 We still want to be able to call `bb add` and `bb list`. We have what we need to
 implement `bb list`; we can just update `bb.edn` to look like this:
 
@@ -1132,7 +1132,7 @@ pass the result to the designated function, which is `journal.add/add-entry` in
 this example.
 
 
-=== Task dependencies, parallel tasks, and more ===
+== Task dependencies, parallel tasks, and more ==
 Babashka's task system has even more capabilities, which I'm not going to cover
 in detail but which you can read about in the https://book.babashka.org/#tasks[Task runner section of the
 Babashka docs].
@@ -1155,7 +1155,7 @@ time. In our build example, `bb build` could run `build-backend` and
 `build-frontend` at the same time, which could be a real time saver.
 
 
-=== Summary ===
+== Summary ==
 * You define tasks in `bb.edn` under the `:tasks` key
 * Task definitions are key-value pairs where the key is a symbol naming the
 task, and the value is a Clojure expression
@@ -1166,12 +1166,12 @@ parses command line args before passing to the function
 * You can run tasks in parallel
 
 
-== Resources ==
+= Resources =
 * https://github.com/babashka/babashka/wiki/Bash-and-Babashka-equivalents[Bash and Babashka equivalents] is indispensable for transferring your Bash
 knowledge to Babashka
 
 
-== Acknowledgments ==
+= Acknowledgments =
 The following people read drafts of this and gave feedback. Thank you!
 
 * Michiel Borkent
