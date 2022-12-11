@@ -13,8 +13,8 @@
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn add/add-entry}
-   {:cmds ["list"] :fn list/list-entries}])
+  [{:cmds ["add"] :fn #(add/add-entry (:opts %))}
+   {:cmds ["list"] :fn #(list/list-entries (:opts %))}])
 
 (cli/dispatch table
               *command-line-args*

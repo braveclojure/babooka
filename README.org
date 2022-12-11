@@ -503,7 +503,7 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
     []))
 
 (defn add-entry
-  [{:keys [opts]}]
+  [opts]
   (let [entries (read-entries)]
     (spit ENTRIES-LOCATION
           (conj entries
@@ -519,10 +519,10 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn add-entry}])
+  [{:cmds ["add"] :fn #(add-entry (:opts %))}])
 
 (cli/dispatch table
-              ,*command-line-args*
+              *command-line-args*
               {:spec cli-opts})
 #+END_SRC
 
@@ -534,6 +534,8 @@ corresponding ~:fn~ (~add-entry~ in this case).
 The dispatched function receives a map as its argument, and that map contains
 the ~:opts~ key. This is a map of parsed command line options, and we use it to
 build our dream journal entry in the ~add-entry~ function.
+
+TODO describe printing a summary
 
 And that, my friends, is how you build an interface for your script!
 ** Summary
@@ -608,7 +610,7 @@ the directories that Babashka should look in when you require namespaces, and by
 adding ~"src"~ to it you can use ~(require '[journal.add])~ in your project.
 Babashka will be able to find the corresponding file.
 
-Note that there is nothign special about the ~"src"~ directory. You could use
+Note that there is nothing special about the ~"src"~ directory. You could use
 ~"my-code"~ or even ~"."~ if you wanted, and you can add more than one path.
 ~"src"~ is just the convention preferred by discerning Clojurians the world
 over.
@@ -654,7 +656,7 @@ that looks like:
    [journal.utils :as utils]))
 
 (defn add-entry
-  [{:keys [opts]}]
+  [opts]
   (let [entries (utils/read-entries)]
     (spit utils/ENTRIES-LOCATION
           (conj entries
@@ -714,6 +716,33 @@ Now lets create a the ~journal.list~ namespace. Open the file
 
 This doesn't format the timestamp, but other than that it lists our entries in
 reverse-chronologial order, just like we want. Yay!
+
+To finish up, we need to add ~journal.list/list-entries~ to our dispatch table
+in the ~journal~ file. That file should now look like this:
+
+#+begin_src clojure
+#!/usr/bin/env bb
+
+(require '[babashka.cli :as cli])
+(require '[journal.add :as add])
+(require '[journal.list :as list])
+
+(def cli-opts
+  {:entry     {:alias   :e
+               :desc    "Your dreams."
+               :require true}
+   :timestamp {:alias  :t
+               :desc   "A unix timestamp, when you recorded this."
+               :coerce {:timestamp :long}}})
+
+(def table
+  [{:cmds ["add"] :fn #(add/add-entry (:opts %))}
+   {:cmds ["list"] :fn #(list/list-entries (:opts %))}])
+
+(cli/dispatch table
+              *command-line-args*
+              {:spec cli-opts})
+#+end_src
 
 ** Summary
 
@@ -837,7 +866,92 @@ The pod protocol is documented in [[https://github.com/babashka/pods][the pod Gi
 
 * Other ways of executing code
 
-TODO
+This tutorial has focused on helping you build a standalone script that you
+interact with like would a typical bash script script: you make it executable
+with ~chmod +x~ and you call it from the command line like ~./journal add -e
+"dream entry"~.
+
+There are other flavors (for lack of a better word) of shell scripting that bash
+supports:
+
+- Direct expression evaluation
+- Invoking a Clojure function
+- Naming tasks
+
+** Direct Expression Evaluation
+
+You can give Babashka a Clojure expression and it will evaluate it and print the
+result:
+
+#+begin_src bash
+$ bb -e '(+ 1 2 3)'
+9
+
+$ bb -e '(map inc [1 2 3])'
+(2 3 4)
+#+end_src
+
+Personally I haven't used this much myself, but it's there if you need it!
+
+** Invoking a Clojure function
+
+If we wanted to call our ~journal.add/add-entry~ function directly, we could do
+this:
+
+#+begin_src bash
+bb -x journal.add/add-entry --entry "dreamt of foo"
+#+end_src
+
+When you use ~bb -x~, you can specify the fully-qualified name of a function and
+Babashka will call it. It will parse command-line arguments using ~babashka.cli~
+into a Clojure value and pass that to the specified function. See [[https://book.babashka.org/#_x][the -x section
+of the Babashka docs]] for more information.
+
+You can also use ~bb -m some-namespace/some-function~ to call a function. The
+difference between this and ~bb -x~ is that with ~bb -m~, each command line
+argument is passed unparsed to the Clojure function. For example:
+
+#+begin_src bash
+$ bb -m clojure.core/identity 99
+"99"
+
+$ bb -m clojure.core/identity "[99 100]"
+"[99 100]"
+
+$ bb -m clojure.core/identity 99 100
+----- Error --------------------------------------------------------------------
+Type:     clojure.lang.ArityException
+Message:  Wrong number of args (2) passed to: clojure.core/identity
+Location: <expr>:1:37
+#+end_src
+
+When using ~bb -m~, you can just pass in a namespace and Babashka will call the
+~-main~ function for that namespace. Like, if we wanted our ~journal.add~
+namespace to work with this flavor of invocation, we would write it like this:
+
+#+begin_src clojure
+(ns journal.add
+  (:require
+   [journal.utils :as utils]))
+
+(defn -main
+  [entry-text]
+  (let [entries (utils/read-entries)]
+    (spit utils/ENTRIES-LOCATION
+          (conj entries
+                {:timestamp (System/currentTimeMillis)
+                 :entry     entry-text}))))
+#+end_src
+
+And we could do this:
+
+#+begin_src bash
+$ bb -m journal.add "recurring foo dream"
+#+end_src
+
+Note that for ~bb -x~ or ~bb -m~ to work, you must set up your ~bb.edn~ file so
+that the namespace you're invoking is reachable on the classpath.
+
 
 * Distributing a Babashka program
 
