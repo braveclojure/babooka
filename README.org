@@ -952,7 +952,7 @@ $ bb -m journal.add "recurring foo dream"
 Note that for ~bb -x~ or ~bb -m~ to work, you must set up your ~bb.edn~ file so
 that the namespace you're invoking is reachable on the classpath.
 
-** Tasks
+* Tasks
 
 Another flavor of running command line programs is to call them similarly to
 ~make~ and ~npm~. In your travels as a programmer, you might have run these at
@@ -973,15 +973,94 @@ bb add -e "I was Neo in the Matrix, except all my kung fu moves had sad trombone
 bb list
 #+end_src
 
-You enable this by adding /tasks/ to your ~bb.edn~ file:
+We're going to build up to that in small steps.
+
+** A basic task
+
+First, let's look at a very basic task definition. Tasks are defined in your
+~bb.edn~ file. Update yours to look like this:
+
+#+begin_src clojure
+{:tasks {welcome (println "welcome to your dream journal")}}
+#+end_src
+
+Tasks are defined using a map under the ~:tasks~ keyword. Each key of the map
+names a task, and it should be a symbol. Each value should be a Clojure
+expression. In this example, the ~welcome~ names a task and the associated
+expression is ~(println "welcome to your dream journal")~.
+
+When you call ~bb welcome~, it looks up the ~welcome~ key under ~:tasks~ and
+evaluates the associated expression. Note that you must explicitly print values
+if you want them to be sent to ~stdout~; this wouldn't print anything:
+
+#+begin_src clojure
+{:tasks {welcome "welcome to your dream journal"}}
+#+end_src
+
+** How to require namespaces for tasks
+
+Let's say you wanted to create a task to delete your journal entries. Here's
+what that would looke like:
+
+#+begin_src clojure
+{:tasks {welcome (println "welcome to your dream journal")
+         clear   (shell "rm -rf entries.edn")}}
+#+end_src
+
+If you run ~bb clear~ it will delete your ~entries.edn~ file. This works because
+~shell~ is automatically referred in namespaces, just ~clojure.core~ functions
+are.
+
+If you wanted to delete your file in a cross-platform-friendly way, you could
+use the ~babashka.fs/delete-if-exists~ function. To do that, you must require
+the ~babashka.fs~ namespace. You might assume that you could update your
+~bb.edn~ to look like this and it would work, but it wouldn't:
+
+#+begin_src clojure
+{:tasks {clear (do (require '[babashka.fs :as fs])
+                   (fs/delete-if-exists "entries.edn"))}}
+#+end_src
+
+Instead, to require namespaces you must do so like this:
+
+#+begin_src clojure
+{:tasks {:requires ([babashka.fs :as fs])
+         clear     (fs/delete-if-exists "entries.edn")}}
+#+end_src
+
+** Use ~exec~ to parse arguments and call a function
+
+We still want to be able to call ~bb add~ and ~bb list~. We have what we need to
+implement ~bb list~; we can just update ~bb.edn~ to look like this:
 
 #+begin_src clojure
 {:paths ["src"]
- :tasks {add  (exec 'journal.add/add-entry)
-         list (exec 'journal.list/list-entries)}}
+ :tasks {:requires ([babashka.fs :as fs]
+                    [journal.list :as list])
+         clear     (fs/delete-if-exists "entries.edn")
+         list      (list/list-entries nil)}}
 #+end_src
 
-Now you can do this:
+In the previous task examples I excluded the ~:paths~ key because it wasn't
+needed, but we need to bring it back so that Babashka can find ~journal.list~ on
+the classpath. ~journal.list/list-entries~ takes one argument that gets ignored,
+so we can just pass in ~nil~ and it works.
+
+~journal.add/add-entries~, however, takes a Clojure map with an ~:entries~ key.
+Thus we need some way of parsing the command line arguments into that map and then
+passing that to ~journal.add/add-entries~. Babashka provides the ~exec~ function
+for this. Update your ~bb.edn~ like so, and everything should work:
+
+#+begin_src clojure
+{:paths ["src"]
+ :tasks {:requires ([babashka.fs :as fs]
+                    [journal.list :as list])
+         clear     (fs/delete-if-exists "entries.edn")
+         list      (list/list-entries nil)
+         add       (exec 'journal.add/add-entry)}}
+#+end_src
+
+Now we can call this, and it should work:
 
 #+begin_src bash
 $ bb add --entry "dreamt I was done writing a tutorial. bliss"
@@ -991,7 +1070,50 @@ $ bb list
 dreamt I was done writing a tutorial. bliss
 #+end_src
 
-There's a lot more to the task system that I'm not going to cover here.
+The key here is the ~exec~ function. With ~(exec 'journal.add/add-entry)~, it's
+as if you called this on the command line:
+
+#+begin_src bash
+$ bb -x journal.add/add-entry --entry "dreamt I was done writing a tutorial. bliss"
+#+end_src
+
+~exec~ will parse command line arguments in the same way as ~bb -x~ does and
+pass the result to the designated function, which is ~journal.add/add-entry~ in
+this example.
+
+** Task dependencies, parallel tasks, and more
+
+Babashka's task system has even more capabilities, which I'm not going to cover
+in detail but which you can read about in the [[https://book.babashka.org/#tasks][Task runner section of the
+Babashka docs]].
+
+I do want to highlight two very useful features: /task dependencies/ and
+/parallel task execution/.
+
+Babashka let's you define task dependencies, meaning that you can define
+~task-a~ to depend on ~task-b~ such that if you run ~bb task-a~, internally
+~task-b~ will be executed if needed. This is useful for creating compilation
+scripts. If you were building a web app, for example, you might have separate
+tasks for compiling a backend jar file and frontend javascript file. You could
+have the tasks ~build-backend~, ~build-frontend~, and then have a ~build~ task
+that depended on the other two. If you were to call ~bb build~, Babashka would
+be able to determine which of the other two tasks needed to be run and only
+run them when necessary.
+
+Parallel task execution will have Babashka running multiple tasks at the same
+time. In our build example, ~bb build~ could run ~build-backend~ and
+~build-frontend~ at the same time, which could be a real time saver.
+
+** Summary
+
+- You define tasks in ~bb.edn~ under the ~:tasks~ key
+- Task definitions are key-value pairs where the key is a symbol naming the
+  task, and the value is a Clojure expression
+- Add a ~:requires~ key under the ~:tasks~ key to require namespaces
+- ~exec~ executes functions as if invoked with ~bb -x journal.add/add-entry~; it
+  parses command line args before passing to the function
+- You can declare task dependencies
+- You can run tasks in parallel
 
 * Distributing a Babashka program
 

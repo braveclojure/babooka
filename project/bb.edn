@@ -1,3 +1,6 @@
 {:paths ["src"]
- :tasks {add  (exec 'journal.add/add-entry)
-         list (exec 'journal.list/list-entries)}}
+ :tasks {:requires ([babashka.fs :as fs]
+                    [journal.list :as list])
+         clear     (fs/delete-if-exists "entries.edn")
+         list      (list/list-entries nil)
+         add       (exec 'journal.add/add-entry)}}
