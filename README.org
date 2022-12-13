@@ -196,6 +196,12 @@ Here's what's going on: ~bb~ interprets the Clojure code you've written,
 executing it on the fly. It prints the last value it encounters to ~stdout~,
 which is why ~"Hello, inner world!"~ is returned in your terminal.
 
+INFO: When you print text to ~stdout~, it gets printed to your terminal. This
+tutorial doesn't get into what ~stdout~ actually is, but you can think of it as
+the channel between the internal world of your program and the external world of
+the environment calling your program. When your program sends stuff to ~stdout~,
+your terminal receives it and prints it.
+
 Notice that the quotes are maintained when the value is printed. ~bb~ will
 print the /stringified representation of your data structure/. If you updated
 ~hello.clj~ to read
@@ -222,7 +228,7 @@ With ~nil~ as the last form, ~bb~ does not print to ~stdout~ on exit.
 As for the lack of namespace: this is part of what makes Babashka useful as a
 scripting tool. When you're in a scripting state of mind, you want to start
 hacking on ideas immediately; you don't want to have to deal with boilerplate
-just to get started. Babashka has your back.
+just to get started. Babashka has your babacka.
 
 You /can/ define a namespace (we'll look at that more when we get into project
 organization), but if you don't then Babashka uses the ~user~ namespace by
@@ -242,7 +248,7 @@ line with what you'd expect from using other scripting languages.
 ** What about requiring other namespaces?
 
 You might want to include a namespace declaration because you want to require
-other namespaces. With JVM Clojure and Clojurescript, you require other
+some namespaces. With JVM Clojure and Clojurescript, you typically require
 namespaces like this:
 
 #+begin_src clojure
@@ -257,7 +263,7 @@ It's considered bad form to require namespaces by putting ~(require
 That's not the case with Babashka. You'll see ~(require ...)~ used liberally in
 other examples, and it's OK for you to do that too.
 
-** Executable script
+** Make your script executable
 
 What if you want to execute your script by typing something like ~./hello~
 instead of ~bb hello.clj~? You just need to rename your file, add a shebang, and
@@ -269,6 +275,9 @@ instead of ~bb hello.clj~? You just need to rename your file, add a shebang, and
 (str "Hello from " *ns* ", inner world!")
 #+end_src
 
+INFO: The first line, ~#!/usr/bin/env bb~ is the "shebang", and I'm not going to
+explain it.
+
 Then run this in your terminal:
 
 #+begin_src bash
@@ -276,6 +285,10 @@ mv hello{.clj,}
 chmod +x hello
 ./hello
 #+end_src
+
+First you rename the file, then you call ~chmod +x~ on it to make it executable.
+Then you actually execute it, saying hi to your own inner world which is kind of
+adorable.
 
 ** Summary
 
@@ -304,10 +317,10 @@ for readability):
               it it kept growing and getting more clogged and eventually it
               swallowed up my little unclogger thing"}
  {:timestamp 1
-  :entry     "Was giving a tour of the house I just bought, moved to the backyard
-              and all the... topiary? came alive and I had to fight it with a sword.
-              I understood that this happens every night was very annoyed that this
-              was not disclosed in the listing."}]
+  :entry     "Bought a house in my dream, was giving a tour of the backyard and
+              all the... topiary? came alive and I had to fight it with a sword.
+              I understood that this happens every night was very annoyed that
+              this was not disclosed in the listing."}]
 #+END_SRC
 
 To write to the journal, we want to run the command ~./journal add --entry
