@@ -359,28 +359,33 @@ a collection of functions for working with the filesystem; check out its [[https
 docs]]. When you're writing shell scripts, you're very likely to work with the
 filesystem, so this namespace is going to be your friend.
 
-In this case, the ~read-entries~ function is using ~fs/exists?~ to check that
-~entries.edn~ exists before attempting to read it because ~slurp~ will throw an
-exception if it can't find the file for the path you passed it.
+Here, we're using the ~fs/exists?~ function to check that ~entries.edn~ exists
+before attempting to read it because ~slurp~ will throw an exception if it can't
+find the file for the path you passed it.
 
-The ~add-entry~ function gets the entries as a Clojure data structure, ~conj~s
-an entry, and then uses ~spit~ to write to ~entries.edn~. By default, ~spit~
-will overwrite a file; if you want to append to it, you would call it like
+The ~add-entry~ function uses ~read-entries~ to get a vector of entries, ~conj~s
+an entry, and then uses ~spit~ to write back to ~entries.edn~. By default,
+~spit~ will overwrite a file; if you want to append to it, you would call it
+like
 
 #+begin_src clojure
 (spit "entries.edn" {:timestap 0 :entry ""} :append true)
 #+end_src
 
+Maybe overwriting the whole file is a little dirty, but that's the scripting
+life babyyyyy!
+
 * Creating an interface for your script
 
-In the last line we call ~(add-entry (first *command-line-args*))~.
+OK so in the last line we call ~(add-entry (first *command-line-args*))~.
 ~*command-line-args*~ is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
 ~args.clj~ with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2
 3~, it would print ~("1" "2" "3")~.
 
-With this code we can add an entry by calling ~./journal "Flying!! But to IHOP??"~.
-This is almost what we want; we actually want to call ~./journal add --entry "entry text"~.
+Our ~journal~ file is at the point where we can add an entry by calling
+~./journal "Flying!! But to Home Depot??"~. This is almost what we want; we
+actually want to call ~./journal add --entry "Flying!! But to Home Depot??"~.
 The assumption here is that we'll want to have other commands like ~./journal
 list~ or ~./joural delete~.
 
@@ -422,63 +427,14 @@ argument parsing:
 - [[https://github.com/nubank/docopt.clj][nubank/docopt.clj]]
 
 Babashka provides the [[https://github.com/babashka/cli][babashka.cli library]] for both parsing options and
-dispatches subcommands. We'll briefly look at clojure.tools.cli, then focus on
-babashka.cli.
+dispatches subcommands. We're going to focus just on babashka.cli.
 
-** clojure.tools.cli
-
-clojure.tools.cli lets you create a kind of schema for command line options. For
-each option, you can define:
-
-- its short and long flags (e.g. ~-e~ and ~--entry~)
-- whether the argument is required
-- validation functions
-- help text
-- a default value
-- a parsing function
-
-Here's what that would look like:
-
-#+begin_src clojure
-(require '[clojure.tools.cli :as cli])
-(def cli-opts
-  [["-e" "--entry ENTRY" "Text of your entry"]
-   ["-t" "--timestamp"
-    :parse-fn #(Integer/parseInt %)
-    :validate [nat-int? "Must be 0 or greater"]]])
-
-(cli/parse-opts ["-e" "dreamt I was a butterfly"] cli-opts)
-;; =>
-{:options {:entry "dreamt I was a butterfly"},
- :arguments [],
- :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
- :errors nil}
-#+end_src
-
-The first schema, ~["-e" "--entry ENTRY" "Text of your entry"]~ gives the short
-and long flags and a description that can be used to produce help text. In
-~"--entry ENTRY"~, the presence of ~ENTRY~ indicates that the argument is
-required. If it's not included, the ~:errors~ key will be populated with an
-error message:
-
-#+CAPTION:
-#+BEGIN_SRC clojure
-(cli/parse-opts ["-e"] cli-opts)
-;; =>
-{:options {},
- :arguments [],
- :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
- :errors ["Missing required argument for \"-e ENTRY\""]}
-#+END_SRC
-
-See the [[https://github.com/clojure/tools.cli][clojure.tools.cli docs]] for more info!
-
-** babashka.cli
+** parsing options with babashka.cli
 
 The [[https://github.com/babashka/cli][babashka.cli docs]] do a good job of explaining how to use the library to meet
 all your command line parsing needs. Rather than going over every option, I'll
-just focus on what we need to build our dream journal. Here's how we parse
-options:
+just focus on what we need to build our dream journal. To parse options, we
+require the ~babashka.cli~ namespace and we define a /CLI spec/:
 
 #+BEGIN_SRC clojure
 (require '[babashka.cli :as cli])
@@ -489,25 +445,39 @@ options:
    :timestamp {:alias  :t
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
+#+END_SRC
 
-(cli/parse-opts ["-e" "The toast had eyes :("] {:spec cli-opts})
+A CLI spec is a map where each key is a keyword, and each value is an /option
+spec/. This key is the /long name/ of your option; ~:entry~ corresponds to the
+flag ~--entry~ on the command line.
+
+The option spec is a map you can use to further config the option. ~:alias~ lets
+you specify a /short name/ for you options, so that you can use e.g. ~-e~
+instead of ~--entry~ at the command line. ~:desc~ is used to create a summary
+for your interface, and ~:require~ is used to enforce the presence of an option.
+~:coerce~ is used to transform the option's value into some other data type.
+
+We can test out this CLI spec in a REPL:
+
+#+begin_src clojure
+(cli/parse-opts ["-e" "The more I mowed, the higher the grass got :("] {:spec cli-opts})
 ;; =>
-{:entry "The toast had eyes :("}
+{:entry "The more I mowed, the higher the grass got :("}
+#+end_src
 
-;; leaving out a required flag throws an exception:
+Leaving out a required flag throws an exception:
+
+#+begin_src clojure
 (cli/parse-opts [] {:spec cli-opts})
 ;; exception gets thrown, this gets printed:
 : Required option: :entry user
-#+END_SRC
+#+end_src
 
-So, both clojure.tools.cli and babashka.cli will parse command line arguments
-into a Clojure data structure for you. They have slightly different ways of
-defining schemas, but they essentially perform the same function.
+** dispatching subcommands with babashka.cli
 
-What sets babashka.cli apart is that it goes beyond option parsing to also
-giving you a way to dispatch subcommands, which is exactly what we want to get
-~./journal add --entry "..."~ working. Here's what the final version of
-~journal~ looks like:
+babashka.cli goes beyond option parsing to also giving you a way to dispatch
+subcommands, which is exactly what we want to get ~./journal add --entry "..."~
+working. Here's what the final version of ~journal~ looks like:
 
 #+BEGIN_SRC clojure
 #!/usr/bin/env bb
@@ -540,7 +510,7 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn #(add-entry (:opts %))}])
+  [{:cmds ["add"] :fn (fn [m] (add-entry (:opts m)))}])
 
 (cli/dispatch table
               *command-line-args*
