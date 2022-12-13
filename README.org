@@ -4,21 +4,24 @@
 * Introduction
 
 There are two types of programmers in the world: the practical, sensible,
-shell-resigned people who need to google the correct argument order for ~ln -s~,
-and those twisted, Stockholmed souls who will gleefully spend a weekend cooking
-up hundreds of lines of bash.
+shell-resigned people who need to google the correct argument order for ~ln -s~;
+and those twisted, Stockholmed souls who will gleefully run their company's
+entire infrastructure on 57 commands stitched together into a single line of
+bash.
 
 This guide is for the former. For the latter: sorry, but I can't help you.
 
 [[https://babashka.org][Babashka]] is a Clojure scripting runtime that is a powerful, delightful
 alternative to the shell scripts you're used to. This comprehensive tutorial
-will will help you understand:
+will teach you:
 
 - What babashka is, what it does, how it works, and how it can fit into your
   workflow
 - How to write babashka scripts
 - How to organize your babashka projects
-- What pods and tasks are, and how to use them
+- What pods are, and how they provide a native Clojure interface for external
+  programs
+- How to use tasks to create interfaces similar to ~make~ or ~npm~
 
 If you'd like to stop doing something that hurts (writing incomprehensible shell
 scripts) and start doing something that feels great (writing Babashka scripts),
@@ -42,21 +45,22 @@ bb my-clojure-program.clj
 
 If you're familiar with Clojure, you'll find this significant because it
 eliminates the startup time you'd otherwise have to contend with for a
-JVM-compiled Clojure program. It also uses much less memory than running a jar.
-Babashka makes it feasible to use Clojure even more than you already do.
+JVM-compiled Clojure program, not to mention you don't have to compile the file.
+It also uses much less memory than running a jar. Babashka makes it feasible to
+use Clojure even more than you already do.
 
 If you're unfamiliar with Clojure, using Babashka is a great way to try out the
 language. Clojure is a /hosted/ language, meaning that the language is defined
 independently of the underlying runtime environment. Most Clojure programs are
-compiled to run on the Java Virtual Machine so that they can be run anywhere
-Java runs. The other main target is JavaScript, allowing Clojure to run in a
-browser. With Babashka, you can now run Clojure programs where you'd normally
-run bash scripts. The time you spend investing in Clojure pays dividends as your
-knowledge transfers to these varied environments. (Note that this tutorial
-assumes [[https://www.braveclojure.com/do-things/][basic familiarity with Clojure]].)
+compiled to run on the Java Virtual Machine (JVM) so that they can be run
+anywhere Java runs. The other main target is JavaScript, allowing Clojure to run
+in a browser. With Babashka, you can now run Clojure programs where you'd
+normally run bash scripts. The time you spend investing in Clojure pays
+dividends as your knowledge transfers to these varied environments. (Note that
+this tutorial assumes [[https://www.braveclojure.com/do-things/][basic familiarity with Clojure]].)
 
 From an implementation perspective, Babashka is a standalone, natively-compiled
-binary, meaning that it executes "directly" on the operating system, rather than
+binary, meaning that the operating system executes it directly, rather than
 running in a JVM. When the babashka binary gets compiled, it includes many
 Clojure namespaces and libraries so that they are usable with native
 performance. You can [[https://book.babashka.org/#libraries][check out the full list of built-in namespaces]]. Babashka
@@ -81,14 +85,14 @@ stand apart from contenders:
 
 *First-class support for multi-threaded programming.* Clojure makes
 multi-threaded programming simple and easy to write and reason about. With
-Babashka, you can write straightforward scripts that e.g. fetch data from
-multiple databases in parallel.
+Babashka, you can write straightforward scripts that e.g. fetch and process data
+from multiple databases in parallel.
 
 *Real testing.* You can unit test your Babashka code just as you would any other
-Clojure project, and you can use other testing libraries as you see fit.
+Clojure project. How do you even test bash?
 
-*Real project organization.* Clojure namespaces are a clear and sane way to
-organize your project's functions and build reusable libraries.
+*Real project organization.* Clojure namespaces are a sane way to organize your
+project's functions and build reusable libraries.
 
 *Cross-platform compatibility.* It's nice not having to worry that an OS
 X-developed script is broken in your continuous integration pipeline.
