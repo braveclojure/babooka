@@ -6,21 +6,24 @@ Daniel Higginbotham
 
 = Introduction =
 There are two types of programmers in the world: the practical, sensible,
-shell-resigned people who need to google the correct argument order for `ln -s`,
-and those twisted, Stockholmed souls who will gleefully spend a weekend cooking
-up hundreds of lines of bash.
+shell-resigned people who need to google the correct argument order for `ln -s`;
+and those twisted, Stockholmed souls who will gleefully run their company's
+entire infrastructure on 57 commands stitched together into a single line of
+bash.
 
 This guide is for the former. For the latter: sorry, but I can't help you.
 
 https://babashka.org[Babashka] is a Clojure scripting runtime that is a powerful, delightful
 alternative to the shell scripts you're used to. This comprehensive tutorial
-will will help you understand:
+will teach you:
 
 * What babashka is, what it does, how it works, and how it can fit into your
 workflow
 * How to write babashka scripts
 * How to organize your babashka projects
-* What pods and tasks are, and how to use them
+* What pods are, and how they provide a native Clojure interface for external
+programs
+* How to use tasks to create interfaces similar to `make` or `npm`
 
 If you'd like to stop doing something that hurts (writing incomprehensible shell
 scripts) and start doing something that feels great (writing Babashka scripts),
@@ -45,21 +48,22 @@ bb my-clojure-program.clj
 
 If you're familiar with Clojure, you'll find this significant because it
 eliminates the startup time you'd otherwise have to contend with for a
-JVM-compiled Clojure program. It also uses much less memory than running a jar.
-Babashka makes it feasible to use Clojure even more than you already do.
+JVM-compiled Clojure program, not to mention you don't have to compile the file.
+It also uses much less memory than running a jar. Babashka makes it feasible to
+use Clojure even more than you already do.
 
 If you're unfamiliar with Clojure, using Babashka is a great way to try out the
 language. Clojure is a _hosted_ language, meaning that the language is defined
 independently of the underlying runtime environment. Most Clojure programs are
-compiled to run on the Java Virtual Machine so that they can be run anywhere
-Java runs. The other main target is JavaScript, allowing Clojure to run in a
-browser. With Babashka, you can now run Clojure programs where you'd normally
-run bash scripts. The time you spend investing in Clojure pays dividends as your
-knowledge transfers to these varied environments. (Note that this tutorial
-assumes https://www.braveclojure.com/do-things/[basic familiarity with Clojure].)
+compiled to run on the Java Virtual Machine (JVM) so that they can be run
+anywhere Java runs. The other main target is JavaScript, allowing Clojure to run
+in a browser. With Babashka, you can now run Clojure programs where you'd
+normally run bash scripts. The time you spend investing in Clojure pays
+dividends as your knowledge transfers to these varied environments. (Note that
+this tutorial assumes https://www.braveclojure.com/do-things/[basic familiarity with Clojure].)
 
 From an implementation perspective, Babashka is a standalone, natively-compiled
-binary, meaning that it executes "directly" on the operating system, rather than
+binary, meaning that the operating system executes it directly, rather than
 running in a JVM. When the babashka binary gets compiled, it includes many
 Clojure namespaces and libraries so that they are usable with native
 performance. You can https://book.babashka.org/#libraries[check out the full list of built-in namespaces]. Babashka
@@ -84,14 +88,14 @@ stand apart from contenders:
 
 *First-class support for multi-threaded programming.* Clojure makes
 multi-threaded programming simple and easy to write and reason about. With
-Babashka, you can write straightforward scripts that e.g. fetch data from
-multiple databases in parallel.
+Babashka, you can write straightforward scripts that e.g. fetch and process data
+from multiple databases in parallel.
 
 *Real testing.* You can unit test your Babashka code just as you would any other
-Clojure project, and you can use other testing libraries as you see fit.
+Clojure project. How do you even test bash?
 
-*Real project organization.* Clojure namespaces are a clear and sane way to
-organize your project's functions and build reusable libraries.
+*Real project organization.* Clojure namespaces are a sane way to organize your
+project's functions and build reusable libraries.
 
 *Cross-platform compatibility.* It's nice not having to worry that an OS
 X-developed script is broken in your continuous integration pipeline.
@@ -198,6 +202,12 @@ Here's what's going on: `bb` interprets the Clojure code you've written,
 executing it on the fly. It prints the last value it encounters to `stdout`,
 which is why `"Hello, inner world!"` is returned in your terminal.
 
+INFO: When you print text to `stdout`, it gets printed to your terminal. This
+tutorial doesn't get into what `stdout` actually is, but you can think of it as
+the channel between the internal world of your program and the external world of
+the environment calling your program. When your program sends stuff to `stdout`,
+your terminal receives it and prints it.
+
 Notice that the quotes are maintained when the value is printed. `bb` will
 print the _stringified representation of your data structure_. If you updated
 `hello.clj` to read
@@ -226,7 +236,7 @@ With `nil` as the last form, `bb` does not print to `stdout` on exit.
 As for the lack of namespace: this is part of what makes Babashka useful as a
 scripting tool. When you're in a scripting state of mind, you want to start
 hacking on ideas immediately; you don't want to have to deal with boilerplate
-just to get started. Babashka has your back.
+just to get started. Babashka has your babacka.
 
 You _can_ define a namespace (we'll look at that more when we get into project
 organization), but if you don't then Babashka uses the `user` namespace by
@@ -247,7 +257,7 @@ line with what you'd expect from using other scripting languages.
 
 == What about requiring other namespaces? ==
 You might want to include a namespace declaration because you want to require
-other namespaces. With JVM Clojure and Clojurescript, you require other
+some namespaces. With JVM Clojure and Clojurescript, you typically require
 namespaces like this:
 
 [source,clojure]
@@ -264,7 +274,7 @@ That's not the case with Babashka. You'll see `(require ...)` used liberally in
 other examples, and it's OK for you to do that too.
 
 
-== Executable script ==
+== Make your script executable ==
 What if you want to execute your script by typing something like `./hello`
 instead of `bb hello.clj`? You just need to rename your file, add a shebang, and
 `chmod +x` that bad boy. Update `hello.clj` to read:
@@ -276,6 +286,9 @@ instead of `bb hello.clj`? You just need to rename your file, add a shebang, and
 (str "Hello from " *ns* ", inner world!")
 ----
 
+INFO: The first line, `#!/usr/bin/env bb` is the "shebang", and I'm not going to
+explain it.
+
 Then run this in your terminal:
 
 [source,bash]
@@ -284,6 +297,10 @@ mv hello{.clj,}
 chmod +x hello
 ./hello
 ----
+
+First you rename the file, then you call `chmod +x` on it to make it executable.
+Then you actually execute it, saying hi to your own inner world which is kind of
+adorable.
 
 
 == Summary ==
@@ -313,10 +330,10 @@ for readability):
               it it kept growing and getting more clogged and eventually it
               swallowed up my little unclogger thing"}
  {:timestamp 1
-  :entry     "Was giving a tour of the house I just bought, moved to the backyard
-              and all the... topiary? came alive and I had to fight it with a sword.
-              I understood that this happens every night was very annoyed that this
-              was not disclosed in the listing."}]
+  :entry     "Bought a house in my dream, was giving a tour of the backyard and
+              all the... topiary? came alive and I had to fight it with a sword.
+              I understood that this happens every night was very annoyed that
+              this was not disclosed in the listing."}]
 ----
 
 To write to the journal, we want to run the command `./journal add --entry
@@ -356,29 +373,34 @@ a collection of functions for working with the filesystem; check out its https:/
 docs]. When you're writing shell scripts, you're very likely to work with the
 filesystem, so this namespace is going to be your friend.
 
-In this case, the `read-entries` function is using `fs/exists?` to check that
-`entries.edn` exists before attempting to read it because `slurp` will throw an
-exception if it can't find the file for the path you passed it.
+Here, we're using the `fs/exists?` function to check that `entries.edn` exists
+before attempting to read it because `slurp` will throw an exception if it can't
+find the file for the path you passed it.
 
-The `add-entry` function gets the entries as a Clojure data structure, `conj\~s
-an entry, and then uses \~spit` to write to `entries.edn`. By default, `spit`
-will overwrite a file; if you want to append to it, you would call it like
+The `add-entry` function uses `read-entries` to get a vector of entries, `conj\~s
+an entry, and then uses \~spit` to write back to `entries.edn`. By default,
+`spit` will overwrite a file; if you want to append to it, you would call it
+like
 
 [source,clojure]
 ----
 (spit "entries.edn" {:timestap 0 :entry ""} :append true)
 ----
 
+Maybe overwriting the whole file is a little dirty, but that's the scripting
+life babyyyyy!
+
 
 = Creating an interface for your script =
-In the last line we call `(add-entry (first *command-line-args*))`.
+OK so in the last line we call `(add-entry (first *command-line-args*))`.
 `*command-line-args*` is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
 `args.clj` with the contents `*command-line-args*`, then ran `bb args.clj 1 2
 3`, it would print `("1" "2" "3")`.
 
-With this code we can add an entry by calling `./journal "Flying!! But to IHOP??"`.
-This is almost what we want; we actually want to call `./journal add --entry "entry text"`.
+Our `journal` file is at the point where we can add an entry by calling
+`./journal "Flying!! But to Home Depot??"`. This is almost what we want; we
+actually want to call `./journal add --entry "Flying!! But to Home Depot??"`.
 The assumption here is that we'll want to have other commands like `./journal
 list` or `./joural delete`.
 
@@ -421,64 +443,14 @@ argument parsing:
 * https://github.com/nubank/docopt.clj[nubank/docopt.clj]
 
 Babashka provides the https://github.com/babashka/cli[babashka.cli library] for both parsing options and
-dispatches subcommands. We'll briefly look at clojure.tools.cli, then focus on
-babashka.cli.
+dispatches subcommands. We're going to focus just on babashka.cli.
 
 
-== clojure.tools.cli ==
-clojure.tools.cli lets you create a kind of schema for command line options. For
-each option, you can define:
-
-* its short and long flags (e.g. `-e` and `--entry`)
-* whether the argument is required
-* validation functions
-* help text
-* a default value
-* a parsing function
-
-Here's what that would look like:
-
-[source,clojure]
-----
-(require '[clojure.tools.cli :as cli])
-(def cli-opts
-  [["-e" "--entry ENTRY" "Text of your entry"]
-   ["-t" "--timestamp"
-    :parse-fn #(Integer/parseInt %)
-    :validate [nat-int? "Must be 0 or greater"]]])
-
-(cli/parse-opts ["-e" "dreamt I was a butterfly"] cli-opts)
-;; =>
-{:options {:entry "dreamt I was a butterfly"},
- :arguments [],
- :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
- :errors nil}
-----
-
-The first schema, `["-e" "--entry ENTRY" "Text of your entry"]` gives the short
-and long flags and a description that can be used to produce help text. In
-`"--entry ENTRY"`, the presence of `ENTRY` indicates that the argument is
-required. If it's not included, the `:errors` key will be populated with an
-error message:
-
-[source,clojure]
-----
-(cli/parse-opts ["-e"] cli-opts)
-;; =>
-{:options {},
- :arguments [],
- :summary "  -e, --entry ENTRY  Text of your entry\n  -t, --timestamp",
- :errors ["Missing required argument for \"-e ENTRY\""]}
-----
-
-See the https://github.com/clojure/tools.cli[clojure.tools.cli docs] for more info!
-
-
-== babashka.cli ==
+== parsing options with babashka.cli ==
 The https://github.com/babashka/cli[babashka.cli docs] do a good job of explaining how to use the library to meet
 all your command line parsing needs. Rather than going over every option, I'll
-just focus on what we need to build our dream journal. Here's how we parse
-options:
+just focus on what we need to build our dream journal. To parse options, we
+require the `babashka.cli` namespace and we define a _CLI spec_:
 
 [source,clojure]
 ----
@@ -490,25 +462,41 @@ options:
    :timestamp {:alias  :t
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
+----
 
-(cli/parse-opts ["-e" "The toast had eyes :("] {:spec cli-opts})
+A CLI spec is a map where each key is a keyword, and each value is an _option
+spec_. This key is the _long name_ of your option; `:entry` corresponds to the
+flag `--entry` on the command line.
+
+The option spec is a map you can use to further config the option. `:alias` lets
+you specify a _short name_ for you options, so that you can use e.g. `-e`
+instead of `--entry` at the command line. `:desc` is used to create a summary
+for your interface, and `:require` is used to enforce the presence of an option.
+`:coerce` is used to transform the option's value into some other data type.
+
+We can test out this CLI spec in a REPL:
+
+[source,clojure]
+----
+(cli/parse-opts ["-e" "The more I mowed, the higher the grass got :("] {:spec cli-opts})
 ;; =>
-{:entry "The toast had eyes :("}
+{:entry "The more I mowed, the higher the grass got :("}
+----
 
-;; leaving out a required flag throws an exception:
+Leaving out a required flag throws an exception:
+
+[source,clojure]
+----
 (cli/parse-opts [] {:spec cli-opts})
 ;; exception gets thrown, this gets printed:
 : Required option: :entry user
 ----
 
-So, both clojure.tools.cli and babashka.cli will parse command line arguments
-into a Clojure data structure for you. They have slightly different ways of
-defining schemas, but they essentially perform the same function.
 
-What sets babashka.cli apart is that it goes beyond option parsing to also
-giving you a way to dispatch subcommands, which is exactly what we want to get
-`./journal add --entry "..."` working. Here's what the final version of
-`journal` looks like:
+== dispatching subcommands with babashka.cli ==
+babashka.cli goes beyond option parsing to also giving you a way to dispatch
+subcommands, which is exactly what we want to get `./journal add --entry "..."`
+working. Here's what the final version of `journal` looks like:
 
 [source,clojure]
 ----
@@ -542,7 +530,7 @@ giving you a way to dispatch subcommands, which is exactly what we want to get
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn #(add-entry (:opts %))}])
+  [{:cmds ["add"] :fn (fn [m] (add-entry (:opts m)))}])
 
 (cli/dispatch table
               *command-line-args*
