@@ -656,10 +656,10 @@ that looks like:
 #+end_src
 
 Look, it's a namespace declaration! And that namespace declaration has a
-~(:require ...)~ block. When you write Babashka scripts, you can forego
-declaring a namespace if all your code is in one file, like in the original
-version of ~journal~. However, once you start splitting your code into multiple
-files, the normal rules of Clojure project organization apply:
+~(:require ...)~ form. We know that when you write Babashka scripts, you can
+forego declaring a namespace if all your code is in one file, like in the
+original version of ~journal~. However, once you start splitting your code into
+multiple files, the normal rules of Clojure project organization apply:
 
 - Namespace names must correspond to filesystem paths. If you want to name a
   namespace ~journal.add~, Babashka must be able to find it at
@@ -967,7 +967,7 @@ Babashka allows you to write commands similarly. For our dream journal, we might
 want to be able to execute the following in a terminal:
 
 #+begin_src bash
-bb add -e "I was Neo in the Matrix, except all my kung fu moves had sad trombone sound effects"
+bb add -e "A monk told me the meaning of life. Woke up, for got it."
 bb list
 #+end_src
 
