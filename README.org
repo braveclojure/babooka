@@ -99,7 +99,7 @@ X-developed script is broken in your continuous integration pipeline.
 
 *Interactive Development.* Following the lisp tradition, Babashka provides a
 read-eval-print loop (REPL) that gives you that good good bottom-up
-fast-feedback feeling. Script development is inherently a fast; Babashka makes
+fast-feedback feeling. Script development is inherently fast; Babashka makes
 it a faster.
 
 *Built-in tools for defining your script's interface.* One reason to write a
@@ -132,6 +132,12 @@ wanted to do e.g. logic programming from the command line, now's your chance!
 
 *Good error messages.* Babashka's error handling is the friendliest of all
 Clojure implementations, directing you precisely to where an error occurred.
+
+/I think it would be useful to reference Python somewhere in this section
+because it covers the same scripting space. Moreover, the interpreted
+nature of Python is much like ~babashka~ in terms of speed. Unlike
+Python, one can move to a full-fledged JVM program if need be, or if one
+feels a need for adventure, compiling the ~babashka~ script using GraalVM./
 
 ** Installation
 
@@ -290,6 +296,14 @@ First you rename the file, then you call ~chmod +x~ on it to make it executable.
 Then you actually execute it, saying hi to your own inner world which is kind of
 adorable.
 
+/I think the script above is confusing because one does not need it to
+run ~hello~ as an executable script. All that we need to do is put the
+shebang command at the top, make the file executable, and then type the
+file name, e.g., ~./blip.clj~. I would, instead, remind folks of the
+commands needed (~mv~ , ~chmod~) by way of an example, with the
+assumption that anyone who might use ~babashka~ for scripting should
+already know them./
+
 ** Summary
 
 Here's what you learned in this section:
@@ -302,6 +316,7 @@ Here's what you learned in this section:
 - It's acceptable and even encouraged to require namespaces with ~(require
   ...)~.
 - Babashka writes the last value it encounters to ~stdout~
+- Making ~nil~ the last value in a file will prevent output to ~stdout~
 
 * Working with files
 
@@ -336,7 +351,7 @@ executable with ~chmod +x journal~, then make it look like this:
 (require '[babashka.fs :as fs])
 (require '[clojure.edn :as edn])
 
-(def ENTRIES-LOCATION "entries.edn")
+K(def ENTRIES-LOCATION "entries.edn")
 
 (defn read-entries
   []
@@ -459,11 +474,20 @@ for your interface, and ~:require~ is used to enforce the presence of an option.
 
 We can test out this CLI spec in a REPL:
 
+/I am confused here: are we expected to fire up a REPL with ~babashka
+--repl~, or are we supposed to run the file along the same lines of the
+previous work? This is, of course, a garden with many forks: REPL at the
+command line, REPL in an editor (e.g., CIDER in Emacs), etc. I think that
+the best way to proceed at this stage is to test the code out in the *terminal*/
+
 #+begin_src clojure
 (cli/parse-opts ["-e" "The more I mowed, the higher the grass got :("] {:spec cli-opts})
 ;; =>
 {:entry "The more I mowed, the higher the grass got :("}
 #+end_src
+
+/Note that ~cli/parse-opts~ returns a *map* with the parsed options,
+which will make using the options later on quite easy./
 
 Leaving out a required flag throws an exception:
 
@@ -477,7 +501,7 @@ Leaving out a required flag throws an exception:
 
 babashka.cli goes beyond option parsing to also giving you a way to dispatch
 subcommands, which is exactly what we want to get ~./journal add --entry "..."~
-working. Here's what the final version of ~journal~ looks like:
+working. Here's the final version of ~journal~:
 
 #+BEGIN_SRC clojure
 #!/usr/bin/env bb
@@ -526,6 +550,55 @@ The dispatched function receives a map as its argument, and that map contains
 the ~:opts~ key. This is a map of parsed command line options, and we use it to
 build our dream journal entry in the ~add-entry~ function.
 
+/The code above was pretty confusing, so I looked at the code in the
+repo, which I have copied below, and realized that this section must be
+in flux. The new version of the code (~journal~), which I copied below,
+makes sense to me and probably should replace the version above./
+
+#+begin_src clojure
+  #!/usr/bin/env bb
+
+  (require '[babashka.cli :as cli])
+  (require '[babashka.fs :as fs])
+  (require '[clojure.edn :as edn])
+
+  (def ENTRIES-LOCATION "entries.edn")
+
+  (defn read-entries
+    []
+    (if (fs/exists? ENTRIES-LOCATION)
+      (edn/read-string (slurp ENTRIES-LOCATION))
+      []))
+
+  (defn add-entry
+    [{:keys [opts]}]
+  
+    (let [entries (read-entries)]
+      (spit ENTRIES-LOCATION
+            (conj entries
+                  (merge {:timestamp (System/currentTimeMillis)} ;; default timestamp
+                         opts)))))
+
+  (def cli-opts
+    {:entry     {:alias   :e
+                 :desc    "Your dreams."
+                 :require true}
+     :timestamp {:alias  :t
+                 :desc   "A unix timestamp, when you recorded this."
+                 :coerce {:timestamp :long}}})
+
+  (def table
+    [{:cmds ["add"] :fn add-entry}])
+
+  (cli/dispatch table
+                ,*command-line-args*
+                {:spec cli-opts})
+#+end_src
+
+/I tested the code above with ~./journal add -e "This is a test"~ and it
+worked fine. It might not be a bad idea to remind users how to invoke the
+options by way of an example like the one I ran in my test./
+
 TODO describe printing a summary
 
 And that, my friends, is how you build an interface for your script!
@@ -536,7 +609,7 @@ And that, my friends, is how you build an interface for your script!
 - Your script might provide /subcommands/, e.g. ~add~ in ~journal add~, and you
   will need to map the command line arguments to the appropriate function in
   your script
-- The libraries ~clojure.tools.cli~ and ~nubank/docopts~ will parse command line
+- The libraries ~clojure.tools.cli~ and ~nubank/docopts~ can parse command line
   arguments into options for you
 - I prefer using ~babashka.cli~ because it also handles subcommand dispatch, but
   really this decision is a matter of taste
@@ -705,6 +778,10 @@ Now lets create a the ~journal.list~ namespace. Open the file
       (println entry "\n"))))
 #+end_src
 
+/I tried running the code and it wouldn't run unless I made ~:entry
+:require~ have a value of ~false~, which makes sense because we are
+saying that the option ~:entry~ must be present always./
+
 This doesn't format the timestamp, but other than that it lists our entries in
 reverse-chronologial order, just like we want. Yay!
 
@@ -734,6 +811,10 @@ in the ~journal~ file. That file should now look like this:
               *command-line-args*
               {:spec cli-opts})
 #+end_src
+
+/The functions on ~table~ can be simplified as ~:fn add/add-entry~ if one
+destructures the arguments in the functions themselves, which I have
+done. One could argue either way but I prefer the simpler ~table~ form./
 
 ** Summary
 
