@@ -812,9 +812,10 @@ in the ~journal~ file. That file should now look like this:
               {:spec cli-opts})
 #+end_src
 
-/The functions on ~table~ can be simplified as ~:fn add/add-entry~ if one
-destructures the arguments in the functions themselves, which I have
-done. One could argue either way but I prefer the simpler ~table~ form./
+/The functions on ~table~ above can be simplified as ~:fn add/add-entry~
+if one destructures the arguments in the functions themselves, which I
+have done. One could argue either way but I prefer the simpler ~table~
+form./
 
 ** Summary
 
@@ -1027,6 +1028,8 @@ And we could do this:
 #+begin_src bash
 $ bb -m journal.add "recurring foo dream"
 #+end_src
+
+/and we will see this last entry if we type ~./journal list~/
 
 Note that for ~bb -x~ or ~bb -m~ to work, you must set up your ~bb.edn~ file so
 that the namespace you're invoking is reachable on the classpath.
