@@ -7,14 +7,14 @@
 (def cli-opts
   {:entry     {:alias   :e
                :desc    "Your dreams."
-               :require true}
+               :require false}
    :timestamp {:alias  :t
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn #(add/add-entry (:opts %))}
-   {:cmds ["list"] :fn #(list/list-entries (:opts %))}])
+  [{:cmds ["add"] :fn add/add-entry}
+   {:cmds ["list"] :fn list/list-entries}])
 
 (cli/dispatch table
               *command-line-args*
