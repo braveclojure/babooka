@@ -308,7 +308,8 @@ Here's what you learned in this section:
   still runs and it's still Clojure!
 - It's acceptable and even encouraged to require namespaces with ~(require
   ...)~.
-- Babashka writes the last value it encounters to ~stdout~
+- Babashka writes the last value it encounters to ~stdout~, except if that value
+  is ~nil~
 
 * Working with files
 
