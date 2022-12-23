@@ -246,7 +246,7 @@ default. Try updating your file to read:
 #+END_SRC
 
 Running it will print ~"Hello from user, inner world!"~. This might be
-surprising becase there's a mismatch between filename (~hello.clj~) and
+surprising because there's a mismatch between filename (~hello.clj~) and
 namespace name. In other Clojure implementations, the current namespace strictly
 corresponds to the source file's filename, but Babashka relaxes that a little
 bit in this specific context. It provides a scripting experience that's more in
@@ -465,7 +465,10 @@ instead of ~--entry~ at the command line. ~:desc~ is used to create a summary
 for your interface, and ~:require~ is used to enforce the presence of an option.
 ~:coerce~ is used to transform the option's value into some other data type.
 
-We can test out this CLI spec in a REPL:
+We can test out this CLI spec in a REPL. There are many options for starting a
+Babashka REPL, and the most straightforward is simply typing ~bb repl~ at the
+command line. After that, you can paste in the code from the snippet above, then
+paste in this snippet:
 
 #+begin_src clojure
 (cli/parse-opts ["-e" "The more I mowed, the higher the grass got :("] {:spec cli-opts})
