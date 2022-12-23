@@ -392,10 +392,11 @@ arguments that were passed to the script. If you were to create the file
 3~, it would print ~("1" "2" "3")~.
 
 Our ~journal~ file is at the point where we can add an entry by calling
-~./journal "Flying!! But to Home Depot??"~. This is almost what we want; we
-actually want to call ~./journal add --entry "Flying!! But to Home Depot??"~.
+~./journal "Flying\!\! But to Home Depot??"~. This is almost what we want; we
+actually want to call ~./journal add --entry "Flying\!\! But to Home Depot??"~.
 The assumption here is that we'll want to have other commands like ~./journal
-list~ or ~./joural delete~.
+list~ or ~./joural delete~. (You have to escape the exclamation marks otherwise
+bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the commind line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
@@ -504,7 +505,7 @@ aid people in using your program. Behold:
 
 babashka.cli goes beyond option parsing to also giving you a way to dispatch
 subcommands, which is exactly what we want to get ~./journal add --entry "..."~
-working. Here's what the final version of ~journal~ looks like:
+working. Here's the final version of ~journal~:
 
 #+begin_src clojure
 #!/usr/bin/env bb
@@ -548,6 +549,13 @@ working. Here's what the final version of ~journal~ looks like:
    {:cmds [] :fn help}])
 
 (cli/dispatch table *command-line-args*)
+#+end_src
+
+Try it out with the following at your terminal:
+
+#+begin_src bash
+./journal
+./journal add -e "dreamt they did one more episode of Firefly, and I was in it"
 #+end_src
 
 The function ~cli/dispatch~ at the bottom takes a dispatch table as its first
@@ -1184,11 +1192,11 @@ The following people read drafts of this and gave feedback. Thank you!
 ** pods
 ** tasks
 ** feedback
-*** problem with ./journal list -e / :require true
+*** DONE problem with ./journal list -e / :require true
 -e is required for adding, but not for list
-*** add entry "Flying!!" messes up because of bash !!
-*** add a "who this is for" section at beginning
-*** becase
+*** DONE add entry "Flying!!" messes up because of bash !!
+*** DONE add a "who this is for" section at beginning
+*** DONE becase
 *** more consistently call out instructions
 e.g. not "Create the file journal"
 *** getting an entry ad ./journal add --entry "..." step
