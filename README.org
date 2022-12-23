@@ -465,16 +465,20 @@ instead of ~--entry~ at the command line. ~:desc~ is used to create a summary
 for your interface, and ~:require~ is used to enforce the presence of an option.
 ~:coerce~ is used to transform the option's value into some other data type.
 
-We can test out this CLI spec in a REPL. There are many options for starting a
-Babashka REPL, and the most straightforward is simply typing ~bb repl~ at the
-command line. After that, you can paste in the code from the snippet above, then
-paste in this snippet:
+We can experiment with this CLI spec in a REPL. There are many options for
+starting a Babashka REPL, and the most straightforward is simply typing ~bb
+repl~ at the command line. If you want to use CIDER, first add the file ~bb.edn~
+and put an empty map, ~{}~, in it. Then you can use ~cider-jack-in~. After that,
+you can paste in the code from the snippet above, then paste in this snippet:
 
 #+begin_src clojure
 (cli/parse-opts ["-e" "The more I mowed, the higher the grass got :("] {:spec cli-opts})
 ;; =>
 {:entry "The more I mowed, the higher the grass got :("}
 #+end_src
+
+Note that ~cli/parse-opts~ returns a map with the parsed options, which will
+make it easy to use the options later.
 
 Leaving out a required flag throws an exception:
 
@@ -484,14 +488,27 @@ Leaving out a required flag throws an exception:
 : Required option: :entry user
 #+end_src
 
+~cli/parse-opts~ is a great tool for building an interface for simple scripts!
+You can communicate that interface to the outside world with ~cli/format-opts~.
+This function will take an option spec and return a string that you can print to
+aid people in using your program. Behold:
+
+#+begin_src clojure
+(println (cli/format-opts {:spec cli-opts}))
+;; =>
+-e, --entry     Your dreams.
+-t, --timestamp A unix timestamp, when you recorded this.
+#+end_src
+
 ** dispatching subcommands with babashka.cli
 
 babashka.cli goes beyond option parsing to also giving you a way to dispatch
 subcommands, which is exactly what we want to get ~./journal add --entry "..."~
 working. Here's what the final version of ~journal~ looks like:
 
-#+BEGIN_SRC clojure
+#+begin_src clojure
 #!/usr/bin/env bb
+
 (require '[babashka.cli :as cli])
 (require '[babashka.fs :as fs])
 (require '[clojure.edn :as edn])
@@ -505,7 +522,7 @@ working. Here's what the final version of ~journal~ looks like:
     []))
 
 (defn add-entry
-  [opts]
+  [{:keys [opts]}]
   (let [entries (read-entries)]
     (spit ENTRIES-LOCATION
           (conj entries
@@ -520,37 +537,44 @@ working. Here's what the final version of ~journal~ looks like:
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
 
-(def table
-  [{:cmds ["add"] :fn (fn [m] (add-entry (:opts m)))}])
+(defn help
+  [_]
+  (println
+   (str "add\n"
+        (cli/format-opts {:spec cli-opts}))))
 
-(cli/dispatch table
-              *command-line-args*
-              {:spec cli-opts})
-#+END_SRC
+(def table
+  [{:cmds ["add"] :fn add-entry :spec cli-opts}
+   {:cmds [] :fn help}])
+
+(cli/dispatch table *command-line-args*)
+#+end_src
 
 The function ~cli/dispatch~ at the bottom takes a dispatch table as its first
 argument. ~cli/dispatch~ figures out which of the arguments you passed in at the
-command line correspond to commands (~"add"~ in this case), and then calls the
-corresponding ~:fn~ (~add-entry~ in this case).
+command line correspond to commands, and then calls the corresponding ~:fn~. If
+you type ~./journal add ...~, it will dispatch the ~add-entry~ function. If you
+just type ~./journal~ with no arguments, then the ~help~ function gets
+dispatched.
 
 The dispatched function receives a map as its argument, and that map contains
 the ~:opts~ key. This is a map of parsed command line options, and we use it to
 build our dream journal entry in the ~add-entry~ function.
-
-TODO describe printing a summary
 
 And that, my friends, is how you build an interface for your script!
 ** Summary
 
 - For scripts of any complexity, you generally need to /parse/ the command line
   options into Clojure data structures
-- Your script might provide /subcommands/, e.g. ~add~ in ~journal add~, and you
-  will need to map the command line arguments to the appropriate function in
-  your script
 - The libraries ~clojure.tools.cli~ and ~nubank/docopts~ will parse command line
   arguments into options for you
 - I prefer using ~babashka.cli~ because it also handles subcommand dispatch, but
   really this decision is a matter of taste
+- ~cli/parse-opts~ takes an /options spec/ and returns a map
+- ~cli/format-opts~ is useful for creating help text
+- Your script might provide /subcommands/, e.g. ~add~ in ~journal add~, and you
+  will need to map the command line arguments to the appropriate function in
+  your script with ~cli/dispatch~
 
 * Organizing your project
 
@@ -634,11 +658,9 @@ With this in place, we'll now update ~journal~ so that it looks like this:
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn add/add-entry}])
+  [{:cmds ["add"] :fn add/add-entry :spec cli-opts}])
 
-(cli/dispatch table
-              *command-line-args*
-              {:spec cli-opts})
+(cli/dispatch table *command-line-args*)
 #+end_src
 
 Now the file is only responsible for parsing command line arguments and
@@ -738,12 +760,10 @@ in the ~journal~ file. That file should now look like this:
                :coerce {:timestamp :long}}})
 
 (def table
-  [{:cmds ["add"] :fn #(add/add-entry (:opts %))}
-   {:cmds ["list"] :fn #(list/list-entries (:opts %))}])
+  [{:cmds ["add"] :fn #(add/add-entry (:opts %)) :spec cli-opts}
+   {:cmds ["list"] :fn #(list/list-entries nil)}])
 
-(cli/dispatch table
-              *command-line-args*
-              {:spec cli-opts})
+(cli/dispatch table *command-line-args*)
 #+end_src
 
 ** Summary

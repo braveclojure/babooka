@@ -28,19 +28,14 @@
                :desc   "A unix timestamp, when you recorded this."
                :coerce {:timestamp :long}}})
 
+(defn help
+  [_]
+  (println
+   (str "add\n"
+        (cli/format-opts {:spec cli-opts}))))
+
 (def table
-  [{:cmds ["add"] :fn add-entry}])
+  [{:cmds ["add"] :fn add-entry :spec cli-opts}
+   {:cmds [] :fn help}])
 
-(cli/dispatch table
-              *command-line-args*
-              {:spec cli-opts})
-
-(comment
-  (add-entry (first *command-line-args*))
-
-  ;; clojure.tools.cli format
-  (def cli-opts
-    [["-e" "--entry ENTRY" "Text of your entry"]
-     ["-t" "--timestamp"
-      :parse-fn #(Integer/parseInt %)
-      :validate [nat-int? "Must be 0 or greater"]]]))
+(cli/dispatch table *command-line-args*)
