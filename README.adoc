@@ -30,12 +30,9 @@ scripts) and start doing something that feels great (writing Babashka scripts),
 then read on!
 
 NOTE: If you're unfamiliar with Clojure, Babashka is actually a great tool for
-learning! [This crash course](https://www.braveclojure.com/do-things/[https://www.braveclojure.com/do-things/]) and [this
-chapter on namespaces](https://www.braveclojure.com/organization/[https://www.braveclojure.com/organization/]) cover what
-you need to understand the Clojure used here. There are many good editor
-extensions for working with Clojure code, including [Calva for VS
-Code](https://calva.io/getting-started/[https://calva.io/getting-started/]) and [CIDER for
-emacs](https://docs.cider.mx/cider/index.html[https://docs.cider.mx/cider/index.html]).
+learning! https://www.braveclojure.com/do-things/[This crash course] and https://www.braveclojure.com/organization/[this chapter on namespaces] cover what you need
+to understand the Clojure used here. There are many good editor extensions for
+working with Clojure code, including https://calva.io/getting-started/[Calva for VS Code] and https://docs.cider.mx/cider/index.html[CIDER for emacs].
 
 
 == What is Babashka? ==
