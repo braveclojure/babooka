@@ -1158,9 +1158,15 @@ time. In our build example, ~bb build~ could run ~build-backend~ and
 
 The following people read drafts of this and gave feedback. Thank you!
 
-- Michiel Borkent
+- Michiel Borkent @borkdude
 - Marcela Poffalo
-- Gabriel Horner
+- Gabriel Horner @cldwalker
+- @geraldodev
+- Andrew Patrick @Ajpatri
+- Alex Gravem @kartesus
+- Inge Solvoll @ingesol
+- @focaskater
+- @monkey1@fosstodon.org
 
 * COMMENT outline
 ** What is babashka?
@@ -1197,3 +1203,4 @@ The following people read drafts of this and gave feedback. Thank you!
 *** more consistently call out instructions
 e.g. not "Create the file journal"
 *** getting an entry ad ./journal add --entry "..." step
+*** update acknowledgements

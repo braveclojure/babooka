@@ -1208,6 +1208,12 @@ knowledge to Babashka
 = Acknowledgments =
 The following people read drafts of this and gave feedback. Thank you!
 
-* Michiel Borkent
+* Michiel Borkent @borkdude
 * Marcela Poffalo
-* Gabriel Horner
+* Gabriel Horner @cldwalker
+* @geraldodev
+* Andrew Patrick @Ajpatri
+* Alex Gravem @kartesus
+* Inge Solvoll @ingesol
+* @focaskater
+* @monkey1@fosstodon.org
