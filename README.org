@@ -30,8 +30,8 @@ NOTE: If you're unfamiliar with Clojure, Babashka is actually a great tool for
 learning! [[https://www.braveclojure.com/do-things/][This crash course]] and [[https://www.braveclojure.com/organization/][this chapter on namespaces]] cover what you need
 to understand the Clojure used here. There are many good editor extensions for
 working with Clojure code, including [[https://calva.io/getting-started/][Calva for VS Code]] and [[https://docs.cider.mx/cider/index.html][CIDER for emacs]]. If
-you're new to the command line, check out [Learn Enough Command Line to be
-Dangerous](https://www.learnenough.com/command-line-tutorial).
+you're new to the command line, check out [[https://www.learnenough.com/command-line-tutorial][Learn Enough Command Line to be
+Dangerous]].
 
 ** What is Babashka?
 

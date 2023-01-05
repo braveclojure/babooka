@@ -32,8 +32,8 @@ NOTE: If you're unfamiliar with Clojure, Babashka is actually a great tool for
 learning! https://www.braveclojure.com/do-things/[This crash course] and https://www.braveclojure.com/organization/[this chapter on namespaces] cover what you need
 to understand the Clojure used here. There are many good editor extensions for
 working with Clojure code, including https://calva.io/getting-started/[Calva for VS Code] and https://docs.cider.mx/cider/index.html[CIDER for emacs]. If
-you're new to the command line, check out [Learn Enough Command Line to be
-Dangerous](https://www.learnenough.com/command-line-tutorial[https://www.learnenough.com/command-line-tutorial]).
+you're new to the command line, check out https://www.learnenough.com/command-line-tutorial[Learn Enough Command Line to be
+Dangerous].
 
 
 == What is Babashka? ==
@@ -398,10 +398,10 @@ life babyyyyy!
 
 
 = Creating an interface for your script =
-OK so in the last line we call `(add-entry (first \*command-line-args\*))`.
-`\*command-line-args\*` is a sequence containing, well, all the command line
+OK so in the last line we call `(add-entry (first \*command-line-args*))`.
+`\*command-line-args*` is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
-`args.clj` with the contents `\*command-line-args\*`, then ran `bb args.clj 1 2
+`args.clj` with the contents `\*command-line-args*`, then ran `bb args.clj 1 2
 3`, it would print `("1" "2" "3")`.
 
 Our `journal` file is at the point where we can add an entry by calling
@@ -413,7 +413,7 @@ bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the commind line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
-dispatch on the first argument to `\*command-line-args\*`, something like this:
+dispatch on the first argument to `\*command-line-args*`, something like this:
 
 [source,clojure]
 ----
