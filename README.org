@@ -1,6 +1,5 @@
 #+title: Babashka Babooka: Write Command-Line Clojure
 
-
 * Introduction
 
 There are two types of programmers in the world: the practical, sensible,
@@ -30,7 +29,9 @@ then read on!
 NOTE: If you're unfamiliar with Clojure, Babashka is actually a great tool for
 learning! [[https://www.braveclojure.com/do-things/][This crash course]] and [[https://www.braveclojure.com/organization/][this chapter on namespaces]] cover what you need
 to understand the Clojure used here. There are many good editor extensions for
-working with Clojure code, including [[https://calva.io/getting-started/][Calva for VS Code]] and [[https://docs.cider.mx/cider/index.html][CIDER for emacs]].
+working with Clojure code, including [[https://calva.io/getting-started/][Calva for VS Code]] and [[https://docs.cider.mx/cider/index.html][CIDER for emacs]]. If
+you're new to the command line, check out [Learn Enough Command Line to be
+Dangerous](https://www.learnenough.com/command-line-tutorial).
 
 ** What is Babashka?
 
@@ -200,7 +201,7 @@ Here's what's going on: ~bb~ interprets the Clojure code you've written,
 executing it on the fly. It prints the last value it encounters to ~stdout~,
 which is why ~"Hello, inner world!"~ is returned in your terminal.
 
-INFO: When you print text to ~stdout~, it gets printed to your terminal. This
+NOTE: When you print text to ~stdout~, it gets printed to your terminal. This
 tutorial doesn't get into what ~stdout~ actually is, but you can think of it as
 the channel between the internal world of your program and the external world of
 the environment calling your program. When your program sends stuff to ~stdout~,
@@ -279,7 +280,7 @@ instead of ~bb hello.clj~? You just need to rename your file, add a shebang, and
 (str "Hello from " *ns* ", inner world!")
 #+end_src
 
-INFO: The first line, ~#!/usr/bin/env bb~ is the "shebang", and I'm not going to
+NOTE: The first line, ~#!/usr/bin/env bb~ is the "shebang", and I'm not going to
 explain it.
 
 Then run this in your terminal:
@@ -368,10 +369,10 @@ Here, we're using the ~fs/exists?~ function to check that ~entries.edn~ exists
 before attempting to read it because ~slurp~ will throw an exception if it can't
 find the file for the path you passed it.
 
-The ~add-entry~ function uses ~read-entries~ to get a vector of entries, ~conj~s
-an entry, and then uses ~spit~ to write back to ~entries.edn~. By default,
-~spit~ will overwrite a file; if you want to append to it, you would call it
-like
+The ~add-entry~ function uses ~read-entries~ to get a vector of entries, uses
+~conj~ to add an entry, and then uses ~spit~ to write back to ~entries.edn~. By
+default, ~spit~ will overwrite a file; if you want to append to it, you would
+call it like
 
 #+begin_src clojure
 (spit "entries.edn" {:timestap 0 :entry ""} :append true)
@@ -382,10 +383,10 @@ life babyyyyy!
 
 * Creating an interface for your script
 
-OK so in the last line we call ~(add-entry (first *command-line-args*))~.
-~*command-line-args*~ is a sequence containing, well, all the command line
+OK so in the last line we call ~(add-entry (first \*command-line-args\*))~.
+~\*command-line-args\*~ is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
-~args.clj~ with the contents ~*command-line-args*~, then ran ~bb args.clj 1 2
+~args.clj~ with the contents ~\*command-line-args\*~, then ran ~bb args.clj 1 2
 3~, it would print ~("1" "2" "3")~.
 
 Our ~journal~ file is at the point where we can add an entry by calling
@@ -397,7 +398,7 @@ bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the commind line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
-dispatch on the first argument to ~*command-line-args*~, something like this:
+dispatch on the first argument to ~\*command-line-args\*~, something like this:
 
 #+BEGIN_SRC clojure
 (let [[command _ entry] *command-line-args*]
@@ -1149,13 +1150,12 @@ time. In our build example, ~bb build~ could run ~build-backend~ and
 - You can declare task dependencies
 - You can run tasks in parallel
 
-* Resources
+* Additional Resources
 
 - [[https://github.com/babashka/babashka/wiki/Bash-and-Babashka-equivalents][Bash and Babashka equivalents]] is indispensable for transferring your Bash
   knowledge to Babashka
 
 * Acknowledgments
-
 The following people read drafts of this and gave feedback. Thank you!
 
 - Michiel Borkent @borkdude
@@ -1167,6 +1167,21 @@ The following people read drafts of this and gave feedback. Thank you!
 - Inge Solvoll @ingesol
 - @focaskater
 - @monkey1@fosstodon.org
+- Kira McLean
+
+* Sponsor
+
+Did you enjoy this tutorial? [Consider sponsoring me, Daniel Higginbotham,
+through GitHub](https://github.com/sponsors/flyingmachine). As of April 2022 I
+am spending two days a week working on Clojure educational materials and open
+source libraries to make Clojure more beginner-friendly, and appreciate any
+support!
+
+Please also [consider sponsoring Michiel Borkent, aka borkdude, who created
+babashka](https://github.com/sponsors/borkdude). Michiel is doing truly
+incredible work to transform the Clojure landscape, extending its usefulness and
+reach in ways that benefit us all. He has a proven track record of delivering
+useful tools and engaging with the commuity.
 
 * COMMENT outline
 ** What is babashka?
@@ -1204,3 +1219,11 @@ The following people read drafts of this and gave feedback. Thank you!
 e.g. not "Create the file journal"
 *** getting an entry ad ./journal add --entry "..." step
 *** update acknowledgements
+* COMMENT todo
+** DONE link to borkdude sponsors
+** DONE link to my sponsorship
+** TODO link to PDF
+** DONE instructions on getting feedback
+** DONE fix ~*command-line-args*~
+** TODO make asciidoc version the master
+** TODO remove gumroad link from sidebar
