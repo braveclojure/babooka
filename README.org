@@ -1185,6 +1185,13 @@ The following people read drafts of this and gave feedback. Thank you!
 - @monkey1@fosstodon.org
 - Kira McLean
 
+* Feedback
+
+If you have feedback, please open an issue at
+https://github.com/braveclojure/babooka. I can't promise I'll respond in a
+timely manner, or even at all, so I apologize in advice! I'm just not great at
+responding, it's one of my character flaws, but I appreciate the feedback!
+
 * COMMENT outline
 ** What is babashka?
 *** how it's meant to be used
