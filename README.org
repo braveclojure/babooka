@@ -2,6 +2,9 @@
 
 * Introduction
 
+- [[https://raw.githubusercontent.com/braveclojure/babooka/main/babooka.pdf][Download the free PDF]]
+- [[https://raw.githubusercontent.com/braveclojure/babooka/main/babooka.epub][Download the free epub]]
+
 There are two types of programmers in the world: the practical, sensible,
 shell-resigned people who need to google the correct argument order for ~ln -s~;
 and those twisted, Stockholmed souls who will gleefully run their company's
@@ -32,6 +35,19 @@ to understand the Clojure used here. There are many good editor extensions for
 working with Clojure code, including [[https://calva.io/getting-started/][Calva for VS Code]] and [[https://docs.cider.mx/cider/index.html][CIDER for emacs]]. If
 you're new to the command line, check out [[https://www.learnenough.com/command-line-tutorial][Learn Enough Command Line to be
 Dangerous]].
+
+** Sponsor
+
+If you enjoy this tutorial, [[https://github.com/sponsors/flyingmachine][consider sponsoring me, Daniel Higginbotham, through
+GitHub sponsors]]. As of April 2022 I am spending two days a week working on
+free Clojure educational materials and open source libraries to make Clojure
+more beginner-friendly, and appreciate any support!
+
+Please also [[https://github.com/sponsors/borkdude][consider sponsoring Michiel Borkent, aka borkdude, who created
+babashka]]. Michiel is doing truly incredible work to transform the Clojure
+landscape, extending its usefulness and reach in ways that benefit us all. He
+has a proven track record of delivering useful tools and engaging with the
+commuity.
 
 ** What is Babashka?
 
@@ -383,10 +399,10 @@ life babyyyyy!
 
 * Creating an interface for your script
 
-OK so in the last line we call ~(add-entry (first \*command-line-args\*))~.
-~\*command-line-args\*~ is a sequence containing, well, all the command line
+OK so in the last line we call ~(add-entry (first \*command-line-args*))~.
+~\*command-line-args*~ is a sequence containing, well, all the command line
 arguments that were passed to the script. If you were to create the file
-~args.clj~ with the contents ~\*command-line-args\*~, then ran ~bb args.clj 1 2
+~args.clj~ with the contents ~\*command-line-args*~, then ran ~bb args.clj 1 2
 3~, it would print ~("1" "2" "3")~.
 
 Our ~journal~ file is at the point where we can add an entry by calling
@@ -398,7 +414,7 @@ bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the commind line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
-dispatch on the first argument to ~\*command-line-args\*~, something like this:
+dispatch on the first argument to ~\*command-line-args*~, something like this:
 
 #+BEGIN_SRC clojure
 (let [[command _ entry] *command-line-args*]
@@ -1168,20 +1184,6 @@ The following people read drafts of this and gave feedback. Thank you!
 - @focaskater
 - @monkey1@fosstodon.org
 - Kira McLean
-
-* Sponsor
-
-Did you enjoy this tutorial? [Consider sponsoring me, Daniel Higginbotham,
-through GitHub](https://github.com/sponsors/flyingmachine). As of April 2022 I
-am spending two days a week working on Clojure educational materials and open
-source libraries to make Clojure more beginner-friendly, and appreciate any
-support!
-
-Please also [consider sponsoring Michiel Borkent, aka borkdude, who created
-babashka](https://github.com/sponsors/borkdude). Michiel is doing truly
-incredible work to transform the Clojure landscape, extending its usefulness and
-reach in ways that benefit us all. He has a proven track record of delivering
-useful tools and engaging with the commuity.
 
 * COMMENT outline
 ** What is babashka?
