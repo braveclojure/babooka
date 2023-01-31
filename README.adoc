@@ -455,7 +455,7 @@ through `stdin` -- and using that data to handle these three responsibilities:
 
 * Dispatching to a Clojure function
 * Parsing command-line arguments into Clojure data, and passing that to the
-dispatched functon
+dispatched function
 * Providing feedback in cases where there's a problem performing the above
 responsibilities.
 
