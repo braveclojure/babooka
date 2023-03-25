@@ -412,7 +412,7 @@ The assumption here is that we'll want to have other commands like ~./journal
 list~ or ~./joural delete~. (You have to escape the exclamation marks otherwise
 bash interprets them as history commands.)
 
-To accomplish this, we'll need to handle the commind line arguments in a more
+To accomplish this, we'll need to handle the command line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
 dispatch on the first argument to ~\*command-line-args*~, something like this:
 
