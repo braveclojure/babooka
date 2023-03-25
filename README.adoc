@@ -181,7 +181,7 @@ Create a file named `hello.clj` and put this in it:
 [source,clojure]
 ----
 (require '[clojure.string :as str])
-(str/join " " ["Hello" "inner" "world!"])
+(prn (str/join " " ["Hello" "inner" "world!"]))
 ----
 
 Now run it with `bb`, the babashka executable:
@@ -197,7 +197,6 @@ There are a few things here to point out for experienced Clojurians:
 
 * You didn't need a deps.edn file or project.clj
 * There's no namespace declaration; we use `(require ...)`
-* You didn't need to print the string for the string to be printed
 * It's just Clojure
 
 I very much recommend that you actually try this example before proceeding
@@ -220,8 +219,8 @@ detail.
 
 == Babashka's output ==
 Here's what's going on: `bb` interprets the Clojure code you've written,
-executing it on the fly. It prints the last value it encounters to `stdout`,
-which is why `"Hello, inner world!"` is returned in your terminal.
+executing it on the fly. `prn` prints to `stdout`, which is why `"Hello,
+inner world!"` is returned in your terminal.
 
 NOTE: When you print text to `stdout`, it gets printed to your terminal. This
 tutorial doesn't get into what `stdout` actually is, but you can think of it as
@@ -236,21 +235,19 @@ print the _stringified representation of your data structure_. If you updated
 [source,clojure]
 ----
 "Hello, inner world!"
-["It's" "me," "your" "wacky" "subconscious!"]
+(prn ["It's" "me," "your" "wacky" "subconscious!"])
 ----
 
 Then `["It's" "me," "your" "wacky" "subconscious!"]` would get printed, and
-`"Hello, inner world!"` would not.
+`"Hello, inner world!"` would not. You must use a printing function on a form
+for it to be sent to `stdout`
 
 If you want to print a string without the surrounding quotes, you can use
 
 [source,clojure]
 ----
 (println "Hello, inner world!")
-nil
 ----
-
-With `nil` as the last form, `bb` does not print to `stdout` on exit.
 
 
 == Namespace is optional ==
@@ -427,7 +424,7 @@ The assumption here is that we'll want to have other commands like `./journal
 list` or `./journal delete`. (You have to escape the exclamation marks otherwise
 bash interprets them as history commands.)
 
-To accomplish this, we'll need to handle the commind line arguments in a more
+To accomplish this, we'll need to handle the command line arguments in a more
 sophisticated way. The most obvious and least-effort way to do this would be to
 dispatch on the first argument to `\*command-line-args*`, something like this:
 
@@ -728,7 +725,7 @@ that looks like:
    [journal.utils :as utils]))
 
 (defn add-entry
-  [{:keys [opts]}]
+  [opts]
   (let [entries (utils/read-entries)]
     (spit utils/ENTRIES-LOCATION
           (conj entries
@@ -812,7 +809,7 @@ in the `journal` file. That file should now look like this:
 
 (def table
   [{:cmds ["add"] :fn #(add/add-entry (:opts %)) :spec cli-opts}
-   {:cmds ["list"] :fn #(list/list-entries nil)}])
+   {:cmds ["list"] :fn #(list/list-entries %)}])
 
 (cli/dispatch table *command-line-args*)
 ----

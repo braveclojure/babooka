@@ -176,7 +176,7 @@ Create a file named ~hello.clj~ and put this in it:
 
 #+begin_src clojure
 (require '[clojure.string :as str])
-(str/join " " ["Hello" "inner" "world!"])
+(prn (str/join " " ["Hello" "inner" "world!"]))
 #+end_src
 
 Now run it with ~bb~, the babashka executable:
@@ -191,7 +191,6 @@ There are a few things here to point out for experienced Clojurians:
 
 - You didn't need a deps.edn file or project.clj
 - There's no namespace declaration; we use ~(require ...)~
-- You didn't need to print the string for the string to be printed
 - It's just Clojure
 
 I very much recommend that you actually try this example before proceeding
@@ -214,8 +213,8 @@ detail.
 ** Babashka's output
 
 Here's what's going on: ~bb~ interprets the Clojure code you've written,
-executing it on the fly. It prints the last value it encounters to ~stdout~,
-which is why ~"Hello, inner world!"~ is returned in your terminal.
+executing it on the fly. ~prn~ prints to ~stdout~, which is why ~"Hello,
+inner world!"~ is returned in your terminal.
 
 NOTE: When you print text to ~stdout~, it gets printed to your terminal. This
 tutorial doesn't get into what ~stdout~ actually is, but you can think of it as
@@ -229,20 +228,18 @@ print the /stringified representation of your data structure/. If you updated
 
 #+begin_src clojure
 "Hello, inner world!"
-["It's" "me," "your" "wacky" "subconscious!"]
+(prn ["It's" "me," "your" "wacky" "subconscious!"])
 #+end_src
 
 Then ~["It's" "me," "your" "wacky" "subconscious!"]~ would get printed, and
-~"Hello, inner world!"~ would not.
+~"Hello, inner world!"~ would not. You must use a printing function on a form
+for it to be sent to ~stdout~
 
 If you want to print a string without the surrounding quotes, you can use
 
 #+begin_src clojure
 (println "Hello, inner world!")
-nil
 #+end_src
-
-With ~nil~ as the last form, ~bb~ does not print to ~stdout~ on exit.
 
 ** Namespace is optional
 
@@ -409,7 +406,7 @@ Our ~journal~ file is at the point where we can add an entry by calling
 ~./journal "Flying\!\! But to Home Depot??"~. This is almost what we want; we
 actually want to call ~./journal add --entry "Flying\!\! But to Home Depot??"~.
 The assumption here is that we'll want to have other commands like ~./journal
-list~ or ~./joural delete~. (You have to escape the exclamation marks otherwise
+list~ or ~./journal delete~. (You have to escape the exclamation marks otherwise
 bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the command line arguments in a more
@@ -439,7 +436,7 @@ through ~stdin~ -- and using that data to handle these three responsibilities:
 
 - Dispatching to a Clojure function
 - Parsing command-line arguments into Clojure data, and passing that to the
-  dispatched functon
+  dispatched function
 - Providing feedback in cases where there's a problem performing the above
   responsibilities.
 
@@ -783,7 +780,7 @@ in the ~journal~ file. That file should now look like this:
 
 (def table
   [{:cmds ["add"] :fn #(add/add-entry (:opts %)) :spec cli-opts}
-   {:cmds ["list"] :fn #(list/list-entries nil)}])
+   {:cmds ["list"] :fn #(list/list-entries %)}])
 
 (cli/dispatch table *command-line-args*)
 #+end_src
@@ -1231,8 +1228,7 @@ e.g. not "Create the file journal"
 * COMMENT todo
 ** DONE link to borkdude sponsors
 ** DONE link to my sponsorship
-** TODO link to PDF
+** DONE link to PDF
 ** DONE instructions on getting feedback
 ** DONE fix ~*command-line-args*~
-** TODO make asciidoc version the master
-** TODO remove gumroad link from sidebar
+** DONE remove gumroad link from sidebar
