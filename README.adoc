@@ -424,7 +424,7 @@ Our `journal` file is at the point where we can add an entry by calling
 `./journal "Flying\!\! But to Home Depot??"`. This is almost what we want; we
 actually want to call `./journal add --entry "Flying\!\! But to Home Depot??"`.
 The assumption here is that we'll want to have other commands like `./journal
-list` or `./joural delete`. (You have to escape the exclamation marks otherwise
+list` or `./journal delete`. (You have to escape the exclamation marks otherwise
 bash interprets them as history commands.)
 
 To accomplish this, we'll need to handle the commind line arguments in a more
